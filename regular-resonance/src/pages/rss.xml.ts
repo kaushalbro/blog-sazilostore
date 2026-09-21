@@ -1,8 +1,8 @@
 import type { APIRoute } from 'astro';
-import { getArticles } from '../lib/strapi';
+import { getArticles, type Article } from '../lib/strapi';
 
 export const GET: APIRoute = async () => {
-  let articles = [];
+  let articles: Article[] = [];
   try {
     articles = await getArticles();
   } catch {

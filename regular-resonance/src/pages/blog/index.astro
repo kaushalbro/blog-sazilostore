@@ -150,28 +150,31 @@ const jsonLd = [
       </div>
 
       <!-- ── Articles Grid ── -->
-      {filteredArticles.length === 0 ? (
-        <div class="rounded-3xl border border-dashed border-border/80 bg-card p-12 text-center my-8">
-          <div class="size-14 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto mb-4">
-            <svg class="size-7" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </div>
-          <h3 class="text-lg font-bold text-foreground mb-1">No articles found in this category</h3>
-          <p class="text-sm text-muted-foreground mb-6">Try selecting another topic or clear filters to see all articles.</p>
-          <a href="/blog" class="inline-flex items-center px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-semibold">
-            Show All Articles
-          </a>
-        </div>
-      ) : (
-        <div id="articles-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-          {filteredArticles.map((article) => (
-            <div class="article-item-card" data-title={article.title.toLowerCase()} data-desc={(article.description || '').toLowerCase()} data-cat={(article.category?.name || '').toLowerCase()}>
-              <BlogCard article={article} />
+      <section class="my-8" aria-label="Published Articles">
+        <h2 class="sr-only">All Published Guides and Stories</h2>
+        {filteredArticles.length === 0 ? (
+          <div class="rounded-3xl border border-dashed border-border/80 bg-card p-12 text-center my-8">
+            <div class="size-14 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto mb-4">
+              <svg class="size-7" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
             </div>
-          ))}
-        </div>
-      )}
+            <p class="text-lg font-bold text-foreground mb-1">No articles found in this category</p>
+            <p class="text-sm text-muted-foreground mb-6">Try selecting another topic or clear filters to see all articles.</p>
+            <a href="/blog" class="inline-flex items-center px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-semibold">
+              Show All Articles
+            </a>
+          </div>
+        ) : (
+          <div id="articles-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+            {filteredArticles.map((article) => (
+              <div class="article-item-card" data-title={article.title.toLowerCase()} data-desc={(article.description || '').toLowerCase()} data-cat={(article.category?.name || '').toLowerCase()}>
+                <BlogCard article={article} />
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
 
       <!-- Empty search state (client side) -->
       <div id="no-search-results" class="hidden rounded-3xl border border-dashed border-border/80 bg-card p-12 text-center my-8">
