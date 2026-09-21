@@ -34,6 +34,14 @@ if (!cleanTitle.toLowerCase().includes('sazilo store')) {
   cleanTitle = `${cleanTitle} — Sazilo Store`;
 }
 
+// Clean description (ensuring optimal 140-160 character meta description for search engines)
+let cleanDesc = (description || '').trim();
+if (!cleanDesc) {
+  cleanDesc = 'Explore expert e-commerce guides, retail strategies, and Cloud POS tutorials for building and scaling online businesses in Nepal with Sazilo Store.';
+} else if (cleanDesc.length > 160) {
+  cleanDesc = cleanDesc.slice(0, 157).replace(/\s+[^\s]*$/, '') + '...';
+}
+
 // Clean image URL (ensure no localhost leakage)
 let ogImage = image;
 if (ogImage.startsWith('http://localhost:1337') || ogImage.startsWith('http://127.0.0.1:1337')) {
@@ -50,7 +58,7 @@ if (ogImage.startsWith('http://localhost:1337') || ogImage.startsWith('http://12
 <!-- Primary Meta Tags -->
 <title>{cleanTitle}</title>
 <meta name="title" content={cleanTitle} />
-<meta name="description" content={description} />
+<meta name="description" content={cleanDesc} />
 <meta name="keywords" content="Sazilo Store, SaziloStore, blog, ecommerce website builder nepal, nepali merchants, zero commission, cloud pos, vritico solutions, ecommerce guides" />
 <meta name="author" content={article?.author || 'Sazilo Store'} />
 <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
@@ -65,7 +73,7 @@ if (ogImage.startsWith('http://localhost:1337') || ogImage.startsWith('http://12
 <meta property="og:type" content={article ? 'article' : 'website'} />
 <meta property="og:url" content={computedCanonical} />
 <meta property="og:title" content={cleanTitle} />
-<meta property="og:description" content={description} />
+<meta property="og:description" content={cleanDesc} />
 <meta property="og:image" content={ogImage} />
 <meta property="og:image:alt" content={cleanTitle} />
 <meta property="og:image:width" content="1200" />
@@ -82,7 +90,7 @@ if (ogImage.startsWith('http://localhost:1337') || ogImage.startsWith('http://12
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:url" content={computedCanonical} />
 <meta name="twitter:title" content={cleanTitle} />
-<meta name="twitter:description" content={description} />
+<meta name="twitter:description" content={cleanDesc} />
 <meta name="twitter:image" content={ogImage} />
 <meta name="twitter:image:alt" content={cleanTitle} />
 <meta name="twitter:site" content="@vritico" />

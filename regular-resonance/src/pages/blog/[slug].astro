@@ -44,7 +44,17 @@ const canonicalUrl = `https://blog.vritico.com/blog/${article.slug}`;
 const pageTitle = article.title.includes('Sazilo Store')
   ? article.title
   : `${article.title} — Sazilo Store`;
-const pageDescription = article.description || `Read ${article.title} on Sazilo Store Blog. Practical e-commerce strategies, retail workflows, and merchant insights from Nepal.`;
+let autoDescription = article.description ? article.description.trim() : '';
+if (!autoDescription && article.blocks) {
+  const firstRichText = (article.blocks || []).find((b: any) => b.__component === 'shared.rich-text');
+  if (firstRichText && firstRichText.body) {
+    autoDescription = firstRichText.body
+      .replace(/[#*`_~\[\]\(\)\|\-]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+}
+const pageDescription = autoDescription || `Read ${article.title} on Sazilo Store Blog. Practical e-commerce strategies, retail workflows, and merchant insights from Nepal.`;
 
 function renderRichText(body: string): string {
   if (!body) return '';
@@ -63,7 +73,6 @@ function renderRichText(body: string): string {
       if (!inTable) {
         inTable = true;
         tableHeader = cells;
-        // Check next line for separator
         if (i + 1 < lines.length && lines[i + 1].trim().startsWith('|') && lines[i + 1].includes('---')) {
           i++; // skip separator
         }
@@ -72,7 +81,6 @@ function renderRichText(body: string): string {
       }
     } else {
       if (inTable) {
-        // Render completed table
         let tableHtml = '<div class="overflow-x-auto my-8 rounded-2xl border border-border/80 shadow-xs"><table class="w-full text-left text-sm">';
         if (tableHeader.length > 0) {
           tableHtml += '<thead class="bg-muted/70 text-foreground font-bold border-b border-border/80"><tr>';
@@ -120,12 +128,45 @@ function renderRichText(body: string): string {
     processedLines.push(tableHtml);
   }
 
-  let text = processedLines.join('\n');
+  // Heading Level Normalizer:
+  // Page Title is H1. Inside content, top-level headings must be H2, and sub-headings H3, H4.
+  // We track current heading level so future author contributions NEVER skip a level (e.g., H2 -> H4 is impossible).
+  let currentLevel = 1;
+  const normalizedLines: string[] = [];
 
-  text = text.replace(/^#### (.*)$/gm, '<h4 class="text-lg sm:text-xl font-bold mt-6 mb-2 text-foreground tracking-tight">$1</h4>');
-  text = text.replace(/^### (.*)$/gm, '<h3 class="text-xl sm:text-2xl font-bold mt-8 mb-3 text-foreground tracking-tight">$1</h3>');
-  text = text.replace(/^## (.*)$/gm, '<h2 class="text-2xl sm:text-3xl font-extrabold mt-10 mb-4 text-foreground tracking-tight">$1</h2>');
-  text = text.replace(/^# (.*)$/gm, '<h2 class="text-3xl sm:text-4xl font-black mt-10 mb-4 text-foreground tracking-tight">$1</h2>');
+  for (const line of processedLines) {
+    const headingMatch = line.match(/^(#{1,6})\s+(.*)$/);
+    if (headingMatch) {
+      const rawLevel = headingMatch[1].length;
+      const headingText = headingMatch[2].trim();
+
+      let targetLevel: number;
+      if (rawLevel === 1) {
+        // H1 mapped to H2 inside article body
+        targetLevel = 2;
+      } else if (rawLevel > currentLevel + 1) {
+        // Skips clamped to at most 1 level deeper than current
+        targetLevel = currentLevel + 1;
+      } else {
+        targetLevel = rawLevel;
+      }
+
+      currentLevel = targetLevel;
+
+      if (targetLevel === 2) {
+        normalizedLines.push(`<h2 class="text-2xl sm:text-3xl font-extrabold mt-10 mb-4 text-foreground tracking-tight">${headingText}</h2>`);
+      } else if (targetLevel === 3) {
+        normalizedLines.push(`<h3 class="text-xl sm:text-2xl font-bold mt-8 mb-3 text-foreground tracking-tight">${headingText}</h3>`);
+      } else {
+        normalizedLines.push(`<h4 class="text-lg sm:text-xl font-bold mt-6 mb-2 text-foreground tracking-tight">${headingText}</h4>`);
+      }
+    } else {
+      normalizedLines.push(line);
+    }
+  }
+
+  let text = normalizedLines.join('\n');
+
   text = text.replace(/^---$/gm, '<hr class="my-8 border-border/70" />');
   text = text.replace(/^\- (.*)$/gm, '<li class="ml-6 list-disc my-1.5 text-foreground/90 leading-relaxed">$1</li>');
   text = text.replace(/^\d+\.\s+(.*)$/gm, '<li class="ml-6 list-decimal my-1.5 text-foreground/90 leading-relaxed">$1</li>');
