@@ -15,8 +15,12 @@ services:
       - "traefik.docker.network=coolify"
 
       # 1. Astro Blog Frontend (blog.vritico.com -> port 4321)
+      - "traefik.http.middlewares.redirect-https.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.redirect-https.redirectscheme.permanent=true"
+
       - "traefik.http.routers.sazilo-blog-http.rule=Host(`blog.vritico.com`)"
       - "traefik.http.routers.sazilo-blog-http.entrypoints=web,http"
+      - "traefik.http.routers.sazilo-blog-http.middlewares=redirect-https"
       - "traefik.http.routers.sazilo-blog-http.service=sazilo-blog"
 
       - "traefik.http.routers.sazilo-blog.rule=Host(`blog.vritico.com`)"
@@ -30,6 +34,7 @@ services:
       # 2. Strapi CMS & Media (cmsblog.vritico.com -> port 1337)
       - "traefik.http.routers.sazilo-cms-http.rule=Host(`cmsblog.vritico.com`)"
       - "traefik.http.routers.sazilo-cms-http.entrypoints=web,http"
+      - "traefik.http.routers.sazilo-cms-http.middlewares=redirect-https"
       - "traefik.http.routers.sazilo-cms-http.service=sazilo-cms"
 
       - "traefik.http.routers.sazilo-cms.rule=Host(`cmsblog.vritico.com`)"

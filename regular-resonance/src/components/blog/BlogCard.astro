@@ -34,6 +34,8 @@ const formattedDate = article.publishedAt
       <img
         src={cover}
         alt={article.title}
+        width="600"
+        height="400"
         loading="lazy"
         decoding="async"
         class="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
@@ -96,7 +98,7 @@ const formattedDate = article.publishedAt
     <div class="mt-4 flex items-center justify-between border-t border-border/50 pt-4 text-xs">
       <div class="flex items-center gap-2.5">
         {authorAvatar ? (
-          <img src={authorAvatar} alt={article.author?.name || 'Author'} class="size-7 rounded-full object-cover ring-1 ring-border" />
+          <img src={authorAvatar} alt={article.author?.name || 'Author'} width="28" height="28" class="size-7 rounded-full object-cover ring-1 ring-border" />
         ) : (
           <div class="size-7 rounded-full bg-primary/15 text-primary font-bold flex items-center justify-center text-xs">
             {article.author?.name ? article.author.name.charAt(0).toUpperCase() : 'S'}
