@@ -1,0 +1,403 @@
+---
+import "../../styles/global.css";
+import Toolbar from "../../components/Toolbar.astro";
+import Footer from "../../components/Footer.astro";
+import SEO from "../../components/SEO.astro";
+import BlogCard from "../../components/blog/BlogCard.astro";
+import ShareButtons from "../../components/blog/ShareButtons.astro";
+import AuthorCard from "../../components/blog/AuthorCard.astro";
+import StartFreeTrialBanner from "../../components/blog/StartFreeTrialBanner.astro";
+import NewsletterCTA from "../../components/blog/NewsletterCTA.astro";
+import { getArticles, getArticleBySlug, mediaUrl, calculateReadingTime } from "../../lib/strapi";
+
+export async function getStaticPaths() {
+  try {
+    const articles = await getArticles();
+    return articles.map((a) => ({ params: { slug: a.slug } }));
+  } catch {
+    return [];
+  }
+}
+
+const { slug } = Astro.params;
+const article = slug ? await getArticleBySlug(slug) : null;
+
+if (!article) {
+  return Astro.redirect('/blog');
+}
+
+const allArticles = await getArticles();
+const relatedArticles = allArticles.filter((a) => a.slug !== article.slug).slice(0, 3);
+
+const cover = mediaUrl(article.cover as any);
+const authorAvatar = mediaUrl(article.author?.avatar);
+const readTime = calculateReadingTime(article.blocks || article.description);
+const formattedDate = article.publishedAt
+  ? new Date(article.publishedAt).toLocaleDateString('en-US', {
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric',
+    })
+  : 'Recently Published';
+
+const canonicalUrl = new URL(`/blog/${article.slug}`, Astro.url).href;
+const pageTitle = `${article.title} — Sazilo Store Blog`;
+const pageDescription = article.description || article.title;
+
+function renderRichText(body: string): string {
+  if (!body) return '';
+
+  // Process tables before escaping
+  const lines = body.split('\n');
+  const processedLines: string[] = [];
+  let inTable = false;
+  let tableHeader: string[] = [];
+  let tableRows: string[][] = [];
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (line.startsWith('|') && line.endsWith('|')) {
+      const cells = line.slice(1, -1).split('|').map(c => c.trim());
+      if (!inTable) {
+        inTable = true;
+        tableHeader = cells;
+        // Check next line for separator
+        if (i + 1 < lines.length && lines[i + 1].trim().startsWith('|') && lines[i + 1].includes('---')) {
+          i++; // skip separator
+        }
+      } else {
+        tableRows.push(cells);
+      }
+    } else {
+      if (inTable) {
+        // Render completed table
+        let tableHtml = '<div class="overflow-x-auto my-8 rounded-2xl border border-border/80 shadow-xs"><table class="w-full text-left text-sm">';
+        if (tableHeader.length > 0) {
+          tableHtml += '<thead class="bg-muted/70 text-foreground font-bold border-b border-border/80"><tr>';
+          tableHeader.forEach(h => {
+            tableHtml += `<th class="px-4 py-3">${h}</th>`;
+          });
+          tableHtml += '</tr></thead>';
+        }
+        tableHtml += '<tbody class="divide-y divide-border/60 bg-card/60">';
+        tableRows.forEach(row => {
+          tableHtml += '<tr class="hover:bg-muted/40 transition-colors">';
+          row.forEach(cell => {
+            tableHtml += `<td class="px-4 py-3 text-foreground/90">${cell}</td>`;
+          });
+          tableHtml += '</tr>';
+        });
+        tableHtml += '</tbody></table></div>';
+        processedLines.push(tableHtml);
+        inTable = false;
+        tableHeader = [];
+        tableRows = [];
+      }
+      processedLines.push(lines[i]);
+    }
+  }
+
+  if (inTable) {
+    let tableHtml = '<div class="overflow-x-auto my-8 rounded-2xl border border-border/80 shadow-xs"><table class="w-full text-left text-sm">';
+    if (tableHeader.length > 0) {
+      tableHtml += '<thead class="bg-muted/70 text-foreground font-bold border-b border-border/80"><tr>';
+      tableHeader.forEach(h => {
+        tableHtml += `<th class="px-4 py-3">${h}</th>`;
+      });
+      tableHtml += '</tr></thead>';
+    }
+    tableHtml += '<tbody class="divide-y divide-border/60 bg-card/60">';
+    tableRows.forEach(row => {
+      tableHtml += '<tr class="hover:bg-muted/40 transition-colors">';
+      row.forEach(cell => {
+        tableHtml += `<td class="px-4 py-3 text-foreground/90">${cell}</td>`;
+      });
+      tableHtml += '</tr>';
+    });
+    tableHtml += '</tbody></table></div>';
+    processedLines.push(tableHtml);
+  }
+
+  let text = processedLines.join('\n');
+
+  text = text.replace(/^#### (.*)$/gm, '<h4 class="text-lg sm:text-xl font-bold mt-6 mb-2 text-foreground tracking-tight">$1</h4>');
+  text = text.replace(/^### (.*)$/gm, '<h3 class="text-xl sm:text-2xl font-bold mt-8 mb-3 text-foreground tracking-tight">$1</h3>');
+  text = text.replace(/^## (.*)$/gm, '<h2 class="text-2xl sm:text-3xl font-extrabold mt-10 mb-4 text-foreground tracking-tight">$1</h2>');
+  text = text.replace(/^# (.*)$/gm, '<h2 class="text-3xl sm:text-4xl font-black mt-10 mb-4 text-foreground tracking-tight">$1</h2>');
+  text = text.replace(/^---$/gm, '<hr class="my-8 border-border/70" />');
+  text = text.replace(/^\- (.*)$/gm, '<li class="ml-6 list-disc my-1.5 text-foreground/90 leading-relaxed">$1</li>');
+  text = text.replace(/^\d+\.\s+(.*)$/gm, '<li class="ml-6 list-decimal my-1.5 text-foreground/90 leading-relaxed">$1</li>');
+  text = text.replace(/\*\*(.+?)\*\*/g, '<strong class="font-bold text-foreground">$1</strong>');
+  text = text.replace(/\*(.+?)\*/g, '<em class="italic">$1</em>');
+  text = text.replace(/\[(.+?)\]\((.+?)\)/g, '<a class="text-primary font-semibold underline underline-offset-4 hover:text-primary/80 transition-colors" href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+
+  return text.split(/\n\n+/).map((p) => {
+    const trimmed = p.trim();
+    if (trimmed.startsWith('<h2') || trimmed.startsWith('<h3') || trimmed.startsWith('<h4') || trimmed.startsWith('<li') || trimmed.startsWith('<div') || trimmed.startsWith('<hr')) {
+      return p;
+    }
+    return `<p class="my-5 leading-8 text-foreground/90 text-base sm:text-lg">${p.replace(/\n/g, '<br/>')}</p>`;
+  }).join('\n');
+}
+
+const jsonLd = [
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": canonicalUrl
+    },
+    "headline": article.title,
+    "description": pageDescription,
+    "image": cover ? [cover] : ["https://sazilostore.vritico.com/storage/platform/logo.webp"],
+    "datePublished": article.publishedAt || new Date().toISOString(),
+    "dateModified": (article as any).updatedAt || article.publishedAt || new Date().toISOString(),
+    "author": {
+      "@type": "Person",
+      "name": article.author?.name || "Sazilo Store Editorial Team"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "Sazilo Store",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://sazilostore.vritico.com/storage/platform/logo.webp"
+      }
+    }
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": new URL("/", Astro.url).href
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "Blog",
+        "item": new URL("/blog", Astro.url).href
+      },
+      {
+        "@type": "ListItem",
+        "position": 3,
+        "name": article.title,
+        "item": canonicalUrl
+      }
+    ]
+  }
+];
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <SEO
+      title={pageTitle}
+      description={pageDescription}
+      image={cover || 'https://sazilostore.vritico.com/storage/platform/logo.webp'}
+      canonicalUrl={canonicalUrl}
+      article={{
+        publishedTime: article.publishedAt,
+        author: article.author?.name || 'Sazilo Store',
+        tags: article.category ? [article.category.name] : [],
+      }}
+      jsonLd={jsonLd}
+    />
+  </head>
+
+  <body class="min-h-screen flex flex-col bg-background text-foreground selection:bg-primary/20 selection:text-primary">
+    <Toolbar />
+
+    <main class="flex-1 w-full max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-10 py-6 sm:py-10">
+      <!-- ── Breadcrumbs ── -->
+      <nav class="flex flex-wrap items-center gap-1.5 sm:gap-2 text-xs text-muted-foreground mb-6 leading-normal" aria-label="Breadcrumb">
+        <a href="/" class="hover:text-primary transition-colors shrink-0 whitespace-nowrap">Home</a>
+        <span class="text-border shrink-0">/</span>
+        <a href="/blog" class="hover:text-primary transition-colors shrink-0 whitespace-nowrap">Blog</a>
+        {article.category && (
+          <>
+            <span class="text-border shrink-0">/</span>
+            <a href={`/category/${article.category.slug}`} class="capitalize hover:text-primary transition-colors shrink-0 whitespace-nowrap font-medium text-foreground/80">
+              {article.category.name}
+            </a>
+          </>
+        )}
+        <span class="text-border shrink-0">/</span>
+        <span class="text-foreground font-medium truncate max-w-[140px] sm:max-w-xs md:max-w-md shrink" title={article.title}>{article.title}</span>
+      </nav>
+
+      <article class="max-w-4xl mx-auto">
+        <!-- ── Article Header ── -->
+        <header class="mb-10 text-center sm:text-left">
+          {article.category && (
+            <a
+              href={`/blog?category=${article.category.slug}`}
+              class="inline-flex items-center rounded-md bg-muted px-3 py-1 text-primary text-xs font-semibold uppercase tracking-wider mb-4 border border-border hover:bg-muted/80 transition-colors"
+            >
+              {article.category.name}
+            </a>
+          )}
+
+          <h1 class="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-foreground leading-[1.15] mb-6">
+            {article.title}
+          </h1>
+
+          {article.description && (
+            <p class="text-lg sm:text-xl text-muted-foreground leading-relaxed mb-8">
+              {article.description}
+            </p>
+          )}
+
+          <!-- Author & Meta Bar -->
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-y border-border/70 py-4">
+            <div class="flex items-center gap-3">
+              {authorAvatar ? (
+                <img src={authorAvatar} alt={article.author?.name || 'Author'} class="size-11 rounded-full object-cover ring-2 ring-primary/30" />
+              ) : (
+                <div class="size-11 rounded-full bg-primary/15 text-primary font-bold text-base flex items-center justify-center ring-2 ring-primary/30">
+                  {article.author?.name ? article.author.name.charAt(0).toUpperCase() : 'S'}
+                </div>
+              )}
+              <div>
+                <p class="font-bold text-sm sm:text-base text-foreground">{article.author?.name || 'Sazilo Store Team'}</p>
+                <div class="flex items-center gap-2 text-xs text-muted-foreground">
+                  <time datetime={article.publishedAt}>{formattedDate}</time>
+                  <span>•</span>
+                  <span>{readTime}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Social Share Buttons -->
+            <ShareButtons title={article.title} url={canonicalUrl} description={article.description || ''} />
+          </div>
+        </header>
+
+        <!-- ── Cover Image ── -->
+        {cover && (
+          <div class="relative rounded-3xl overflow-hidden mb-12 shadow-xl bg-muted/40 border border-border/60">
+            <img
+              src={cover}
+              alt={article.title}
+              class="w-full h-auto max-h-[540px] object-cover"
+              loading="eager"
+            />
+            {article.cover?.caption && (
+              <p class="p-3 text-center text-xs text-muted-foreground italic bg-card/80 border-t border-border/40">
+                {article.cover.caption}
+              </p>
+            )}
+          </div>
+        )}
+
+        <!-- ── Article Body Content ── -->
+        <div class="prose prose-lg dark:prose-invert max-w-none text-foreground">
+          {(article.blocks || []).map((block: any) => {
+            if (block.__component === 'shared.rich-text') {
+              return <div class="my-6" set:html={renderRichText(block.body || '')} />;
+            }
+            if (block.__component === 'shared.quote') {
+              return (
+                <blockquote class="my-8 rounded-2xl border-l-4 border-primary bg-muted/40 p-6 sm:p-8 shadow-xs">
+                  <p class="text-xl sm:text-2xl font-serif italic text-foreground leading-snug">
+                    “{block.body}”
+                  </p>
+                  {block.title && (
+                    <cite class="mt-3 block text-sm font-semibold text-primary not-italic">
+                      — {block.title}
+                    </cite>
+                  )}
+                </blockquote>
+              );
+            }
+            if (block.__component === 'shared.media') {
+              const src = mediaUrl(block.file);
+              return src ? (
+                <figure class="my-10">
+                  <img
+                    src={src}
+                    alt={block.file?.alternativeText || article.title}
+                    class="rounded-2xl w-full max-h-[480px] object-cover shadow-md border border-border/60"
+                    loading="lazy"
+                  />
+                  {block.file?.caption && (
+                    <figcaption class="mt-2 text-center text-xs text-muted-foreground italic">
+                      {block.file.caption}
+                    </figcaption>
+                  )}
+                </figure>
+              ) : null;
+            }
+            if (block.__component === 'shared.slider') {
+              const files = block.files || [];
+              return (
+                <div class="my-10 grid sm:grid-cols-2 gap-4">
+                  {files.map((f: any) => {
+                    const s = mediaUrl(f);
+                    return s ? (
+                      <img
+                        src={s}
+                        alt={f?.alternativeText || ''}
+                        class="rounded-2xl w-full h-64 object-cover shadow-sm border border-border/60 hover:scale-[1.02] transition-transform duration-300"
+                        loading="lazy"
+                      />
+                    ) : null;
+                  })}
+                </div>
+              );
+            }
+            return null;
+          })}
+        </div>
+
+        <!-- ── Article Bottom Bar (Share & Author Card) ── -->
+        <div class="mt-12 pt-8 border-t border-border/70 space-y-8">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-2xl bg-card border border-border/60">
+            <div>
+              <p class="text-sm font-bold text-foreground">Enjoyed this story?</p>
+              <p class="text-xs text-muted-foreground">Share it with your network or friends.</p>
+            </div>
+            <ShareButtons title={article.title} url={canonicalUrl} description={article.description || ''} />
+          </div>
+
+          <!-- Author Bio -->
+          <AuthorCard author={article.author} />
+        </div>
+      </article>
+
+      <!-- ── Full-Width Start Free Trial & Demo Showcase Banner ── -->
+      <StartFreeTrialBanner />
+
+      <!-- ── Related Articles ── -->
+      {relatedArticles.length > 0 && (
+        <section class="mt-20 pt-12 border-t border-border/70">
+          <div class="flex items-center justify-between mb-8">
+            <h3 class="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
+              More From Sazilo Store Blog
+            </h3>
+            <a href="/blog" class="text-sm font-semibold text-primary hover:underline">
+              View all articles →
+            </a>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {relatedArticles.map((rel) => (
+              <BlogCard article={rel} />
+            ))}
+          </div>
+        </section>
+      )}
+
+      <!-- ── Newsletter ── -->
+      <NewsletterCTA />
+    </main>
+
+    <Footer />
+  </body>
+</html>

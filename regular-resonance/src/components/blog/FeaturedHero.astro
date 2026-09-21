@@ -1,0 +1,185 @@
+---
+import { mediaUrl, calculateReadingTime, type Article } from '../../lib/strapi';
+
+export interface Props {
+  featuredArticle?: Article | null;
+  sideArticles?: Article[];
+}
+
+const { featuredArticle, sideArticles = [] } = Astro.props;
+
+if (!featuredArticle && sideArticles.length === 0) {
+  return;
+}
+
+const mainCover = featuredArticle ? mediaUrl(featuredArticle.cover) : null;
+const mainAuthorAvatar = featuredArticle ? mediaUrl(featuredArticle.author?.avatar) : null;
+const mainReadTime = featuredArticle ? calculateReadingTime(featuredArticle.blocks || featuredArticle.description) : '3 min read';
+const mainDate = featuredArticle?.publishedAt
+  ? new Date(featuredArticle.publishedAt).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    })
+  : 'Recent';
+---
+
+<section class="relative my-8 sm:my-12">
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+    <!-- Main Featured Article (Left / 7 cols) -->
+    {featuredArticle && (
+      <div class="lg:col-span-7 flex">
+        <article class="group relative flex flex-col justify-between w-full rounded-3xl overflow-hidden border border-border/70 bg-card shadow-lg transition-all duration-300 hover:shadow-2xl hover:border-primary/50">
+          <div class="relative h-72 sm:h-96 w-full overflow-hidden bg-muted/40">
+            {mainCover ? (
+              <img
+                src={mainCover}
+                alt={featuredArticle.title}
+                class="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                loading="eager"
+              />
+            ) : (
+              <div class="flex h-full w-full items-center justify-center bg-muted text-muted-foreground/60">
+                <svg class="size-16" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
+                </svg>
+              </div>
+            )}
+            <div class="absolute top-4 left-4 flex items-center gap-2">
+              <span class="inline-flex items-center rounded-md bg-primary px-3 py-1 text-xs font-bold text-primary-foreground tracking-wider uppercase">
+                Featured
+              </span>
+              {featuredArticle.category && (
+                <span class="inline-flex items-center rounded-md bg-card px-2.5 py-1 text-xs font-semibold text-foreground border border-border tracking-wider uppercase">
+                  {featuredArticle.category.name}
+                </span>
+              )}
+            </div>
+          </div>
+
+          <div class="p-6 sm:p-8 flex flex-col justify-between flex-1">
+            <div>
+              <div class="flex items-center gap-3 text-xs text-muted-foreground mb-3">
+                <span class="inline-flex items-center gap-1">
+                  <svg class="size-3.5 text-muted-foreground/70" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  <time datetime={featuredArticle.publishedAt}>{mainDate}</time>
+                </span>
+                <span>•</span>
+                <span class="inline-flex items-center gap-1">
+                  <svg class="size-3.5 text-muted-foreground/70" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  {mainReadTime}
+                </span>
+              </div>
+
+              <h2 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-foreground group-hover:text-primary transition-colors leading-tight mb-4">
+                <a href={`/blog/${featuredArticle.slug}`} class="after:absolute after:inset-0">
+                  {featuredArticle.title}
+                </a>
+              </h2>
+
+              {featuredArticle.description && (
+                <p class="text-muted-foreground text-base sm:text-lg leading-relaxed line-clamp-3 mb-6">
+                  {featuredArticle.description}
+                </p>
+              )}
+            </div>
+
+            <div class="flex items-center justify-between border-t border-border/60 pt-5">
+              <div class="flex items-center gap-3">
+                {mainAuthorAvatar ? (
+                  <img src={mainAuthorAvatar} alt={featuredArticle.author?.name || 'Author'} class="size-9 rounded-full object-cover ring-2 ring-primary/30" />
+                ) : (
+                  <div class="size-9 rounded-full bg-primary/15 text-primary font-bold flex items-center justify-center text-sm">
+                    {featuredArticle.author?.name ? featuredArticle.author.name.charAt(0).toUpperCase() : 'S'}
+                  </div>
+                )}
+                <div>
+                  <p class="text-sm font-semibold text-foreground">{featuredArticle.author?.name || 'Sazilo Store Team'}</p>
+                  <p class="text-xs text-muted-foreground">Editor & Contributor</p>
+                </div>
+              </div>
+
+              <span class="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-xs sm:text-sm font-semibold text-primary-foreground shadow-xs group-hover:bg-primary/90 transition-all">
+                Read Story
+                <svg class="size-4 group-hover:translate-x-1 transition-transform" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                </svg>
+              </span>
+            </div>
+          </div>
+        </article>
+      </div>
+    )}
+
+    <!-- Side / Trending Articles (Right / 5 cols) -->
+    <div class="lg:col-span-5 flex flex-col justify-between gap-4">
+      <div class="flex items-center justify-between px-2 mb-1">
+        <h3 class="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
+          <span class="size-2.5 rounded-full bg-primary animate-pulse" />
+          Trending Stories
+        </h3>
+        <a href="/blog" class="text-xs font-semibold text-primary hover:underline">See all →</a>
+      </div>
+
+      <div class="flex flex-col gap-4 flex-1">
+        {sideArticles.map((article, idx) => {
+          const cover = mediaUrl(article.cover);
+          const date = article.publishedAt
+            ? new Date(article.publishedAt).toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+              })
+            : 'Recent';
+          const read = calculateReadingTime(article.blocks || article.description);
+          return (
+            <article class="group relative flex gap-4 p-4 rounded-2xl border border-border/60 bg-card hover:bg-card/80 hover:border-primary/40 hover:shadow-md transition-all flex-1">
+              <div class="relative size-24 sm:size-28 shrink-0 rounded-xl overflow-hidden bg-muted/40">
+                {cover ? (
+                  <img
+                    src={cover}
+                    alt={article.title}
+                    class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    loading="lazy"
+                  />
+                ) : (
+                  <div class="flex h-full w-full items-center justify-center bg-primary/10 text-primary/40 font-bold text-lg">
+                    0{idx + 1}
+                  </div>
+                )}
+                <span class="absolute bottom-1.5 left-1.5 size-5 rounded-md bg-background/90 backdrop-blur-md text-[10px] font-bold flex items-center justify-center text-foreground border border-border/40">
+                  {idx + 1}
+                </span>
+              </div>
+
+              <div class="flex flex-col justify-between flex-1 min-w-0">
+                <div>
+                  <div class="flex items-center gap-2 text-[11px] text-muted-foreground mb-1">
+                    {article.category && (
+                      <span class="font-semibold text-primary uppercase tracking-wider">{article.category.name}</span>
+                    )}
+                    <span>•</span>
+                    <span>{read}</span>
+                  </div>
+                  <h4 class="font-bold text-sm sm:text-base text-foreground group-hover:text-primary transition-colors leading-snug line-clamp-2">
+                    <a href={`/blog/${article.slug}`} class="after:absolute after:inset-0">
+                      {article.title}
+                    </a>
+                  </h4>
+                </div>
+
+                <div class="flex items-center justify-between text-xs text-muted-foreground pt-2">
+                  <span>{article.author?.name || 'Sazilo Store'}</span>
+                  <span>{date}</span>
+                </div>
+              </div>
+            </article>
+          );
+        })}
+      </div>
+    </div>
+  </div>
+</section>

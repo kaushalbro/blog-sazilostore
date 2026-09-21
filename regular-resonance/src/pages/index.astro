@@ -1,0 +1,255 @@
+---
+import "../styles/global.css";
+import Toolbar from "../components/Toolbar.astro";
+import Footer from "../components/Footer.astro";
+import SEO from "../components/SEO.astro";
+import FeaturedHero from "../components/blog/FeaturedHero.astro";
+import BlogCard from "../components/blog/BlogCard.astro";
+import CategoryFilter from "../components/blog/CategoryFilter.astro";
+import StartFreeTrialBanner from "../components/blog/StartFreeTrialBanner.astro";
+import NewsletterCTA from "../components/blog/NewsletterCTA.astro";
+import { getArticles, getCategories, type Article } from "../lib/strapi";
+
+let articles: Article[] = [];
+let categories: any[] = [];
+
+try {
+  const [fetchedArticles, fetchedCategories] = await Promise.all([
+    getArticles(),
+    getCategories(),
+  ]);
+  articles = fetchedArticles;
+  categories = fetchedCategories;
+} catch {
+  articles = [];
+  categories = [];
+}
+
+const featuredArticle = articles.length > 0 ? articles[0] : null;
+const trendingArticles = articles.length > 1 ? articles.slice(1, 4) : [];
+
+// Category counts
+const categoryCounts = categories.map((cat) => {
+  const count = articles.filter(
+    (a) =>
+      a.category?.slug === cat.slug ||
+      a.category?.name?.toLowerCase() === cat.name?.toLowerCase()
+  ).length;
+  return { ...cat, count };
+});
+
+const pageTitle = "Sazilo Store Blog — Global Marketplace & Direct Store Connect";
+const pageDescription = "Discover authentic products from verified local businesses with Zero Middleman. Read the latest stories, marketplace innovations, and technology insights on Sazilo Store Blog.";
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Blog",
+  "name": "Sazilo Store Blog",
+  "url": Astro.url.href,
+  "description": pageDescription,
+  "publisher": {
+    "@type": "Organization",
+    "name": "Sazilo Store",
+    "url": "https://sazilostore.vritico.com",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://sazilostore.vritico.com/storage/platform/logo.webp"
+    }
+  },
+  "blogPost": articles.slice(0, 10).map((a) => ({
+    "@type": "BlogPosting",
+    "headline": a.title,
+    "description": a.description || a.title,
+    "url": new URL(`/blog/${a.slug}`, Astro.url).href,
+    "datePublished": a.publishedAt || new Date().toISOString(),
+    "author": {
+      "@type": "Person",
+      "name": a.author?.name || "Sazilo Store"
+    }
+  }))
+};
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <SEO
+      title={pageTitle}
+      description={pageDescription}
+      jsonLd={jsonLd}
+    />
+  </head>
+
+  <body class="min-h-screen flex flex-col bg-background text-foreground selection:bg-primary/20 selection:text-primary">
+    <Toolbar />
+
+    <main class="flex-1 max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-10 py-6 sm:py-10 w-full">
+      <!-- ── Editorial Welcome / Banner ── -->
+      <header class="mb-8 sm:mb-12 border-b border-border/60 pb-6 sm:pb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+          <div class="inline-flex items-center gap-2 rounded-md bg-muted px-3 py-1 text-primary text-xs font-semibold uppercase tracking-wide mb-3 border border-border">
+            Sazilo Store Publication
+          </div>
+          <h1 class="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-foreground leading-tight">
+            Discover Authentic Products with Zero Middleman.
+          </h1>
+          <p class="text-muted-foreground text-sm sm:text-lg max-w-2xl mt-3 leading-relaxed">
+            Global Marketplace &amp; Direct Store Connect. Discover authentic products from verified local businesses with Zero Middleman, featuring insightful stories on culture, technology, and commerce.
+          </p>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <a
+            href="/blog"
+            class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground font-semibold text-sm shadow-xs hover:bg-primary/90 transition-all cursor-pointer shrink-0"
+          >
+            <span>Browse All ({articles.length})</span>
+            <svg class="size-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+            </svg>
+          </a>
+        </div>
+      </header>
+
+      <!-- ── Featured Hero & Trending Stories ── -->
+      {featuredArticle ? (
+        <FeaturedHero featuredArticle={featuredArticle} sideArticles={trendingArticles} />
+      ) : (
+        <div class="rounded-3xl border border-dashed border-border/80 p-12 text-center my-12 bg-card">
+          <p class="text-lg font-bold text-foreground mb-2">Welcome to Sazilo Store Blog</p>
+          <p class="text-sm text-muted-foreground max-w-md mx-auto mb-6">
+            Articles are loading from your Strapi CMS backend. Make sure Strapi is active at <code class="text-primary font-semibold">http://localhost:1337</code>.
+          </p>
+          <a href="/blog" class="inline-flex items-center px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-semibold">
+            View Blog Page
+          </a>
+        </div>
+      )}
+
+      <!-- ── Topics & Category Filter Bar ── -->
+      {categoryCounts.length > 0 && (
+        <section class="my-12 sm:my-16">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-xl sm:text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
+              <svg class="size-5 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+              </svg>
+              Explore by Topic
+            </h2>
+            <a href="/blog" class="text-xs font-semibold text-primary hover:underline">All topics →</a>
+          </div>
+          <CategoryFilter categories={categoryCounts} totalArticlesCount={articles.length} />
+        </section>
+      )}
+
+      <!-- ── Recent Articles Grid ── -->
+      <section class="my-12 sm:my-16">
+        <div class="flex items-end justify-between mb-8 border-b border-border/60 pb-4">
+          <div>
+            <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
+              Recent Articles
+            </h2>
+            <p class="text-muted-foreground text-sm mt-1">
+              Fresh perspectives, in-depth breakdowns, and weekly picks from the Sazilo Store team.
+            </p>
+          </div>
+          <a href="/blog" class="hidden sm:inline-flex items-center gap-1 text-sm font-semibold text-primary hover:text-primary/80 transition-colors">
+            View archive ({articles.length}) →
+          </a>
+        </div>
+
+        {articles.length === 0 ? (
+          <div class="rounded-2xl border border-border/60 bg-card p-12 text-center text-muted-foreground text-sm">
+            No articles found. Check that Strapi is running and content is published.
+          </div>
+        ) : (
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+            {articles.slice(0, 6).map((article) => (
+              <BlogCard article={article} />
+            ))}
+          </div>
+        )}
+
+        <div class="flex justify-center mt-10">
+          <a
+            href="/blog"
+            class="inline-flex items-center gap-2 rounded-xl border border-border/80 bg-card hover:bg-muted/70 px-6 py-3 text-sm font-semibold text-foreground shadow-xs hover:border-primary/40 transition-all"
+          >
+            <span>Explore All Sazilo Store Articles</span>
+            <svg class="size-4 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+            </svg>
+          </a>
+        </div>
+      </section>
+
+      <!-- ── Big Start Free Trial & Demo Showcase Banner ── -->
+      <StartFreeTrialBanner />
+
+      <!-- ── Newsletter Callout ── -->
+      <NewsletterCTA />
+
+      <!-- ── Editorial Spotlight & About Sazilo Store ── -->
+      <section class="my-16 sm:my-20 rounded-3xl border border-border/70 bg-card/60 p-8 sm:p-12 backdrop-blur-md">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+          <div class="lg:col-span-7">
+            <span class="text-xs font-bold uppercase tracking-widest text-primary mb-2 block">
+              About Sazilo Store
+            </span>
+            <h2 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-foreground mb-4">
+              Direct Commerce. Real Stories. Zero Middleman.
+            </h2>
+            <p class="text-muted-foreground text-sm sm:text-base leading-relaxed mb-6">
+              Sazilo Store is a global marketplace and direct store connect platform. We empower authentic local businesses, verified shops, and direct buyers by cutting out the middleman fees and bringing transparency to commerce.
+            </p>
+            <div class="flex flex-wrap gap-4">
+              <a
+                href="/about"
+                class="inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition-all shadow-xs"
+              >
+                Learn More About Us
+                <svg class="size-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                </svg>
+              </a>
+              <a
+                href="https://sazilostore.vritico.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex items-center gap-2 rounded-xl border border-border/80 bg-background px-5 py-2.5 text-sm font-semibold text-foreground hover:bg-muted transition-all"
+              >
+                Visit Store Marketplace ↗
+              </a>
+            </div>
+          </div>
+
+          <div class="lg:col-span-5 grid grid-cols-2 gap-4">
+            <div class="p-5 rounded-2xl bg-muted/40 border border-border/60">
+              <div class="text-3xl font-black text-primary mb-1">{articles.length}+</div>
+              <div class="text-xs font-semibold text-foreground mb-1">Published Articles</div>
+              <div class="text-[11px] text-muted-foreground">Original stories &amp; insights</div>
+            </div>
+            <div class="p-5 rounded-2xl bg-muted/40 border border-border/60">
+              <div class="text-3xl font-black text-primary mb-1">{categories.length || 5}</div>
+              <div class="text-xs font-semibold text-foreground mb-1">Core Categories</div>
+              <div class="text-[11px] text-muted-foreground">Tech, news, nature &amp; more</div>
+            </div>
+            <div class="p-5 rounded-2xl bg-muted/40 border border-border/60">
+              <div class="text-3xl font-black text-primary mb-1">100%</div>
+              <div class="text-xs font-semibold text-foreground mb-1">Verified Sellers</div>
+              <div class="text-[11px] text-muted-foreground">Direct store connect</div>
+            </div>
+            <div class="p-5 rounded-2xl bg-muted/40 border border-border/60">
+              <div class="text-3xl font-black text-primary mb-1">0%</div>
+              <div class="text-xs font-semibold text-foreground mb-1">Middlemen</div>
+              <div class="text-[11px] text-muted-foreground">Direct buyer transparency</div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <Footer />
+  </body>
+</html>

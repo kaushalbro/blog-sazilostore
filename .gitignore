@@ -1,0 +1,24 @@
+# Node dependencies
+node_modules/
+*/node_modules/
+
+# Build and cache directories
+.astro/
+*/.astro/
+dist/
+*/dist/
+build/
+*/build/
+.cache/
+*/.cache/
+.tmp/
+*/.tmp/
+.strapi/
+*/.strapi/
+
+# Environment files with private local secrets
+.env.local
+*.log
+
+# Backups
+backup_blog_*.sql

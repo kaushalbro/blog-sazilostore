@@ -1,0 +1,63 @@
+---
+export interface CategoryItem {
+  id?: number;
+  name: string;
+  slug: string;
+  count?: number;
+}
+
+export interface Props {
+  categories: CategoryItem[];
+  activeSlug?: string;
+  totalArticlesCount?: number;
+  baseUrl?: string;
+}
+
+const { categories, activeSlug = 'all', totalArticlesCount, baseUrl } = Astro.props;
+---
+
+<div class="flex items-center gap-2 overflow-x-auto py-2 no-scrollbar">
+  <a
+    href="/blog"
+    data-category="all"
+    class={`category-pill inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors border ${
+      activeSlug === 'all'
+        ? 'bg-primary text-primary-foreground border-primary'
+        : 'bg-card text-foreground border-border hover:bg-muted'
+    }`}
+  >
+    <span>All Articles</span>
+    {typeof totalArticlesCount === 'number' && (
+      <span class={`text-[11px] px-1.5 py-0.2 rounded ${
+        activeSlug === 'all' ? 'bg-primary-foreground/20 text-primary-foreground' : 'bg-muted text-muted-foreground'
+      }`}>
+        {totalArticlesCount}
+      </span>
+    )}
+  </a>
+
+  {categories.map((cat) => {
+    const isActive = activeSlug === cat.slug;
+    const href = baseUrl ? `${baseUrl}?category=${cat.slug}` : `/category/${cat.slug}`;
+    return (
+      <a
+        href={href}
+        data-category={cat.slug}
+        class={`category-pill inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors border capitalize ${
+          isActive
+            ? 'bg-primary text-primary-foreground border-primary'
+            : 'bg-card text-foreground border-border hover:bg-muted'
+        }`}
+      >
+        <span>{cat.name}</span>
+        {typeof cat.count === 'number' && (
+          <span class={`text-[11px] px-1.5 py-0.2 rounded ${
+            isActive ? 'bg-primary-foreground/20 text-primary-foreground' : 'bg-muted text-muted-foreground'
+          }`}>
+            {cat.count}
+          </span>
+        )}
+      </a>
+    );
+  })}
+</div>

@@ -1,0 +1,218 @@
+---
+import "../../styles/global.css";
+import Toolbar from "../../components/Toolbar.astro";
+import Footer from "../../components/Footer.astro";
+import SEO from "../../components/SEO.astro";
+import BlogCard from "../../components/blog/BlogCard.astro";
+import CategoryFilter from "../../components/blog/CategoryFilter.astro";
+import StartFreeTrialBanner from "../../components/blog/StartFreeTrialBanner.astro";
+import NewsletterCTA from "../../components/blog/NewsletterCTA.astro";
+import { getArticles, getCategories, type Article } from "../../lib/strapi";
+
+let articles: Article[] = [];
+let categories: any[] = [];
+
+try {
+  const [fetchedArticles, fetchedCategories] = await Promise.all([
+    getArticles(),
+    getCategories(),
+  ]);
+  articles = fetchedArticles;
+  categories = fetchedCategories;
+} catch {
+  articles = [];
+  categories = [];
+}
+
+const selectedCategory = Astro.url.searchParams.get('category') || 'all';
+
+const filteredArticles = selectedCategory === 'all'
+  ? articles
+  : articles.filter(
+      (a) =>
+        a.category?.slug?.toLowerCase() === selectedCategory.toLowerCase() ||
+        a.category?.name?.toLowerCase() === selectedCategory.toLowerCase()
+    );
+
+const categoryCounts = categories.map((cat) => {
+  const count = articles.filter(
+    (a) =>
+      a.category?.slug === cat.slug ||
+      a.category?.name?.toLowerCase() === cat.name?.toLowerCase()
+  ).length;
+  return { ...cat, count };
+});
+
+const pageTitle = selectedCategory === 'all'
+  ? "Blog Archive — Sazilo Store"
+  : `${selectedCategory.toUpperCase()} Articles — Sazilo Store Blog`;
+
+const pageDescription = `Explore ${filteredArticles.length} published articles on Sazilo Store Blog. Featuring stories on technology, nature, commerce, and culture.`;
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  "name": pageTitle,
+  "description": pageDescription,
+  "url": Astro.url.href,
+  "mainEntity": {
+    "@type": "ItemList",
+    "itemListElement": filteredArticles.map((a, i) => ({
+      "@type": "ListItem",
+      "position": i + 1,
+      "url": new URL(`/blog/${a.slug}`, Astro.url).href,
+      "name": a.title
+    }))
+  }
+};
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <SEO
+      title={pageTitle}
+      description={pageDescription}
+      jsonLd={jsonLd}
+    />
+  </head>
+
+  <body class="min-h-screen flex flex-col bg-background text-foreground selection:bg-primary/20 selection:text-primary">
+    <Toolbar />
+
+    <main class="flex-1 max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-10 py-8 sm:py-12 w-full">
+      <!-- ── Breadcrumb & Header ── -->
+      <nav class="flex flex-wrap items-center gap-1.5 sm:gap-2 text-xs text-muted-foreground mb-4 leading-normal" aria-label="Breadcrumb">
+        <a href="/" class="hover:text-primary transition-colors shrink-0 whitespace-nowrap">Home</a>
+        <span class="text-border shrink-0">/</span>
+        <span class="text-foreground font-semibold shrink-0 whitespace-nowrap">Blog</span>
+        {selectedCategory !== 'all' && (
+          <>
+            <span class="text-border shrink-0">/</span>
+            <span class="capitalize text-primary font-bold shrink-0 whitespace-nowrap">{selectedCategory}</span>
+          </>
+        )}
+      </nav>
+
+      <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6 border-b border-border/70 pb-8 mb-8">
+        <div>
+          <h1 class="text-3xl sm:text-5xl font-black tracking-tight text-foreground">
+            {selectedCategory === 'all' ? 'All Articles & Stories' : `${selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1)} Articles`}
+          </h1>
+          <p class="text-muted-foreground text-sm sm:text-base mt-2 max-w-2xl leading-relaxed">
+            Curated articles, interviews, and deep dives published by the Sazilo Store editorial team. ({filteredArticles.length} {filteredArticles.length === 1 ? 'post' : 'posts'} found)
+          </p>
+        </div>
+
+        <!-- Search input box -->
+        <div class="relative w-full lg:w-80">
+          <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <input
+            id="blog-search-input"
+            type="text"
+            placeholder="Search articles by title, topic..."
+            class="w-full rounded-xl border border-border/80 bg-card px-4 py-2.5 pl-10 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-hidden focus:ring-2 focus:ring-primary/20 transition-all shadow-2xs"
+          />
+        </div>
+      </div>
+
+      <!-- ── Category Filter Pills ── -->
+      <div class="mb-10">
+        <CategoryFilter categories={categoryCounts} activeSlug={selectedCategory} totalArticlesCount={articles.length} />
+      </div>
+
+      <!-- ── Articles Grid ── -->
+      {filteredArticles.length === 0 ? (
+        <div class="rounded-3xl border border-dashed border-border/80 bg-card p-12 text-center my-8">
+          <div class="size-14 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto mb-4">
+            <svg class="size-7" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h3 class="text-lg font-bold text-foreground mb-1">No articles found in this category</h3>
+          <p class="text-sm text-muted-foreground mb-6">Try selecting another topic or clear filters to see all articles.</p>
+          <a href="/blog" class="inline-flex items-center px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-semibold">
+            Show All Articles
+          </a>
+        </div>
+      ) : (
+        <div id="articles-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+          {filteredArticles.map((article) => (
+            <div class="article-item-card" data-title={article.title.toLowerCase()} data-desc={(article.description || '').toLowerCase()} data-cat={(article.category?.name || '').toLowerCase()}>
+              <BlogCard article={article} />
+            </div>
+          ))}
+        </div>
+      )}
+
+      <!-- Empty search state (client side) -->
+      <div id="no-search-results" class="hidden rounded-3xl border border-dashed border-border/80 bg-card p-12 text-center my-8">
+        <p class="text-lg font-bold text-foreground mb-1">No matching articles found</p>
+        <p class="text-sm text-muted-foreground mb-4">We couldn't find any articles matching your search query.</p>
+        <button id="clear-search-btn" class="px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-semibold cursor-pointer">
+          Clear Search
+        </button>
+      </div>
+
+      <!-- ── Big Start Free Trial & Demo Showcase Banner ── -->
+      <StartFreeTrialBanner />
+
+      <!-- ── Newsletter Callout ── -->
+      <NewsletterCTA />
+    </main>
+
+    <Footer />
+
+    <script>
+      function setupClientSearch() {
+        const input = document.getElementById('blog-search-input') as HTMLInputElement | null;
+        const container = document.getElementById('articles-container');
+        const emptyState = document.getElementById('no-search-results');
+        const clearBtn = document.getElementById('clear-search-btn');
+
+        if (!input || !container) return;
+
+        const cards = container.querySelectorAll('.article-item-card');
+
+        function filter() {
+          const query = (input?.value || '').trim().toLowerCase();
+          let visibleCount = 0;
+
+          cards.forEach((card) => {
+            const title = card.getAttribute('data-title') || '';
+            const desc = card.getAttribute('data-desc') || '';
+            const cat = card.getAttribute('data-cat') || '';
+
+            if (!query || title.includes(query) || desc.includes(query) || cat.includes(query)) {
+              (card as HTMLElement).style.display = '';
+              visibleCount++;
+            } else {
+              (card as HTMLElement).style.display = 'none';
+            }
+          });
+
+          if (emptyState) {
+            if (visibleCount === 0 && query) {
+              emptyState.classList.remove('hidden');
+            } else {
+              emptyState.classList.add('hidden');
+            }
+          }
+        }
+
+        input.addEventListener('input', filter);
+
+        clearBtn?.addEventListener('click', () => {
+          if (input) input.value = '';
+          filter();
+        });
+      }
+
+      setupClientSearch();
+      document.addEventListener('astro:after-swap', setupClientSearch);
+    </script>
+  </body>
+</html>

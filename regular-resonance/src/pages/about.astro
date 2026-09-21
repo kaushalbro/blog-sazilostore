@@ -1,0 +1,194 @@
+---
+import "../styles/global.css";
+import Toolbar from "../components/Toolbar.astro";
+import Footer from "../components/Footer.astro";
+import SEO from "../components/SEO.astro";
+import AuthorCard from "../components/blog/AuthorCard.astro";
+import StartFreeTrialBanner from "../components/blog/StartFreeTrialBanner.astro";
+import NewsletterCTA from "../components/blog/NewsletterCTA.astro";
+import { getAbout, getAuthors, getCategories, getArticles, mediaUrl } from "../lib/strapi";
+
+let about: any = null;
+let authors: any[] = [];
+let categories: any[] = [];
+let articles: any[] = [];
+
+try {
+  const [aboutData, authorsData, categoriesData, articlesData] = await Promise.all([
+    getAbout(),
+    getAuthors(),
+    getCategories(),
+    getArticles(),
+  ]);
+  about = aboutData;
+  authors = authorsData;
+  categories = categoriesData;
+  articles = articlesData;
+} catch {
+  about = null;
+  authors = [];
+  categories = [];
+  articles = [];
+}
+
+const pageTitle = "About Sazilo Store — Publication & Community";
+const pageDescription = "Learn about Sazilo Store Blog, our mission to champion authentic local businesses, technology, direct commerce, and impactful storytelling.";
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "AboutPage",
+  "name": pageTitle,
+  "description": pageDescription,
+  "url": Astro.url.href,
+  "mainEntity": {
+    "@type": "Organization",
+    "name": "Sazilo Store",
+    "url": "https://sazilostore.vritico.com",
+    "logo": "https://sazilostore.vritico.com/storage/platform/logo.webp",
+    "description": "Global Marketplace & Direct Store Connect. Discover authentic products from verified local businesses with Zero Middleman."
+  }
+};
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <SEO
+      title={pageTitle}
+      description={pageDescription}
+      jsonLd={jsonLd}
+    />
+  </head>
+
+  <body class="min-h-screen flex flex-col bg-background text-foreground selection:bg-primary/20 selection:text-primary">
+    <Toolbar />
+
+    <main class="flex-1 max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-16 w-full">
+      <!-- ── Breadcrumb ── -->
+      <nav class="flex flex-wrap items-center gap-1.5 sm:gap-2 text-xs text-muted-foreground mb-6 leading-normal" aria-label="Breadcrumb">
+        <a href="/" class="hover:text-primary transition-colors shrink-0 whitespace-nowrap">Home</a>
+        <span class="text-border shrink-0">/</span>
+        <span class="text-foreground font-semibold shrink-0 whitespace-nowrap">About</span>
+      </nav>
+
+      <!-- ── Header ── -->
+      <header class="mb-12 border-b border-border/70 pb-8">
+        <div class="inline-flex items-center rounded-md bg-muted px-3 py-1 text-primary text-xs font-semibold uppercase tracking-wider mb-4 border border-border">
+          Our Story &amp; Mission
+        </div>
+        <h1 class="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-foreground mb-4">
+          {about?.title || "About Sazilo Store"}
+        </h1>
+        <p class="text-lg sm:text-xl text-muted-foreground leading-relaxed max-w-2xl">
+          Empowering verified local merchants, celebrating direct commerce, and delivering stories that bridge technology with authentic everyday life.
+        </p>
+      </header>
+
+      <!-- ── Mission Highlights ── -->
+      <section class="grid sm:grid-cols-3 gap-6 my-10">
+        <div class="p-6 rounded-2xl border border-border/70 bg-card">
+          <div class="size-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-3">
+            <svg class="size-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+          </div>
+          <h3 class="font-bold text-base mb-1">Direct Commerce</h3>
+          <p class="text-xs text-muted-foreground leading-relaxed">Connecting shoppers directly to genuine sellers with zero middlemen fees.</p>
+        </div>
+
+        <div class="p-6 rounded-2xl border border-border/70 bg-card">
+          <div class="size-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-3">
+            <svg class="size-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+            </svg>
+          </div>
+          <h3 class="font-bold text-base mb-1">Verified Quality</h3>
+          <p class="text-xs text-muted-foreground leading-relaxed">Ensuring every merchant on the platform is vetted for trust and quality.</p>
+        </div>
+
+        <div class="p-6 rounded-2xl border border-border/70 bg-card">
+          <div class="size-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-3">
+            <svg class="size-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+            </svg>
+          </div>
+          <h3 class="font-bold text-base mb-1">Open Knowledge</h3>
+          <p class="text-xs text-muted-foreground leading-relaxed">Publishing insightful articles on tech, growth, nature, and commerce.</p>
+        </div>
+      </section>
+
+      <!-- ── Strapi Rich Content / Blocks ── -->
+      <section class="prose prose-lg dark:prose-invert max-w-none my-12 text-foreground">
+        {(about?.blocks || []).map((block: any) => {
+          if (block.__component === 'shared.rich-text') {
+            return <div class="my-6 leading-8 text-foreground/90 whitespace-pre-line text-base sm:text-lg">{block.body}</div>;
+          }
+          if (block.__component === 'shared.quote') {
+            return (
+              <blockquote class="my-8 rounded-2xl border-l-4 border-primary bg-muted/40 p-6 sm:p-8 shadow-xs">
+                <p class="text-xl sm:text-2xl font-serif italic text-foreground leading-snug">“{block.body}”</p>
+                {block.title && <cite class="mt-3 block text-sm font-semibold text-primary not-italic">— {block.title}</cite>}
+              </blockquote>
+            );
+          }
+          if (block.__component === 'shared.media') {
+            const src = mediaUrl(block.file);
+            return src ? <img src={src} alt="About Sazilo Store" class="rounded-2xl my-8 w-full shadow-md object-cover" /> : null;
+          }
+          if (block.__component === 'shared.slider') {
+            return (
+              <div class="grid sm:grid-cols-2 gap-4 my-8">
+                {(block.files || []).map((f: any) => {
+                  const s = mediaUrl(f);
+                  return s ? <img src={s} alt="" class="rounded-xl w-full h-56 object-cover shadow-xs" /> : null;
+                })}
+              </div>
+            );
+          }
+          return null;
+        })}
+      </section>
+
+      <!-- ── Editorial Team / Authors ── -->
+      {authors.length > 0 && (
+        <section class="my-16">
+          <h2 class="text-2xl sm:text-3xl font-bold tracking-tight text-foreground mb-6">
+            Meet the Editorial Team
+          </h2>
+          <div class="space-y-4">
+            {authors.map((author) => {
+              const authorArticles = articles.filter((a) => a.author?.id === author.id || a.author?.name === author.name);
+              return <AuthorCard author={author} articleCount={authorArticles.length} />;
+            })}
+          </div>
+        </section>
+      )}
+
+      <!-- ── Explore Topics ── -->
+      {categories.length > 0 && (
+        <section class="my-16 p-8 rounded-3xl border border-border/70 bg-card">
+          <h2 class="text-2xl font-bold text-foreground mb-2">Explore Our Coverage</h2>
+          <p class="text-sm text-muted-foreground mb-6">Browse articles categorized across our core editorial subjects.</p>
+          <div class="flex flex-wrap gap-2.5">
+            {categories.map((cat) => (
+              <a
+                href={`/blog?category=${cat.slug}`}
+                class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-muted hover:bg-primary hover:text-primary-foreground text-sm font-semibold transition-colors capitalize"
+              >
+                {cat.name}
+              </a>
+            ))}
+          </div>
+        </section>
+      )}
+
+      <!-- ── Big Start Free Trial & Demo Showcase Banner ── -->
+      <StartFreeTrialBanner />
+
+      <NewsletterCTA />
+    </main>
+
+    <Footer />
+  </body>
+</html>

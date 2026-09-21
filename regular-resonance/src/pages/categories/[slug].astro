@@ -1,0 +1,17 @@
+---
+import { getCategories } from "../../lib/strapi";
+
+export async function getStaticPaths() {
+  try {
+    const categories = await getCategories();
+    return categories.map((cat) => ({
+      params: { slug: cat.slug },
+    }));
+  } catch {
+    return [];
+  }
+}
+
+const { slug } = Astro.params;
+return Astro.redirect(`/category/${slug}`);
+---

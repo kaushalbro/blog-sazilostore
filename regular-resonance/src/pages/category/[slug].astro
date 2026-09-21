@@ -1,0 +1,157 @@
+---
+import "../../styles/global.css";
+import Toolbar from "../../components/Toolbar.astro";
+import Footer from "../../components/Footer.astro";
+import SEO from "../../components/SEO.astro";
+import BlogCard from "../../components/blog/BlogCard.astro";
+import CategoryFilter from "../../components/blog/CategoryFilter.astro";
+import StartFreeTrialBanner from "../../components/blog/StartFreeTrialBanner.astro";
+import NewsletterCTA from "../../components/blog/NewsletterCTA.astro";
+import { getCategories, getCategoryBySlug, getArticlesByCategory, getArticles } from "../../lib/strapi";
+
+export async function getStaticPaths() {
+  try {
+    const categories = await getCategories();
+    return categories.map((cat) => ({
+      params: { slug: cat.slug },
+    }));
+  } catch {
+    return [];
+  }
+}
+
+const { slug } = Astro.params;
+const category = slug ? await getCategoryBySlug(slug) : null;
+
+if (!category) {
+  return Astro.redirect('/categories');
+}
+
+const [articles, allCategories, allArticles] = await Promise.all([
+  slug ? getArticlesByCategory(slug) : [],
+  getCategories(),
+  getArticles(),
+]);
+
+const categoryCounts = allCategories.map((cat) => {
+  const count = allArticles.filter(
+    (a) =>
+      a.category?.slug === cat.slug ||
+      a.category?.name?.toLowerCase() === cat.name.toLowerCase()
+  ).length;
+  return { ...cat, count };
+});
+
+const pageTitle = `${category.name} Articles — Sazilo Store Blog`;
+const pageDescription = category.description || `Browse in-depth articles, guides, and insights on ${category.name} for modern e-commerce in Nepal.`;
+
+const canonicalUrl = new URL(`/category/${category.slug}`, Astro.url).href;
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  "name": pageTitle,
+  "description": pageDescription,
+  "url": canonicalUrl,
+  "mainEntity": {
+    "@type": "ItemList",
+    "itemListElement": articles.map((a, idx) => ({
+      "@type": "ListItem",
+      "position": idx + 1,
+      "url": new URL(`/blog/${a.slug}`, Astro.url).href,
+      "name": a.title
+    }))
+  }
+};
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <SEO
+      title={pageTitle}
+      description={pageDescription}
+      canonicalUrl={canonicalUrl}
+      jsonLd={jsonLd}
+    />
+  </head>
+
+  <body class="min-h-screen flex flex-col bg-background text-foreground selection:bg-primary/20 selection:text-primary">
+    <Toolbar />
+
+    <main class="flex-1 max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-10 py-8 sm:py-14 w-full">
+      <!-- ── Breadcrumbs ── -->
+      <nav class="flex flex-wrap items-center gap-1.5 sm:gap-2 text-xs text-muted-foreground mb-6 leading-normal" aria-label="Breadcrumb">
+        <a href="/" class="hover:text-primary transition-colors shrink-0 whitespace-nowrap">Home</a>
+        <span class="text-border shrink-0">/</span>
+        <a href="/categories" class="hover:text-primary transition-colors shrink-0 whitespace-nowrap">Categories</a>
+        <span class="text-border shrink-0">/</span>
+        <span class="text-foreground font-semibold whitespace-nowrap">{category.name}</span>
+      </nav>
+
+      <!-- ── Category Header ── -->
+      <header class="mb-10 border-b border-border/70 pb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div>
+          <div class="inline-flex items-center rounded-md bg-muted px-3 py-1 text-primary text-xs font-semibold uppercase tracking-wider mb-3 border border-border">
+            Topic Category
+          </div>
+          <h1 class="text-3xl sm:text-5xl font-black tracking-tight text-foreground mb-3">
+            {category.name}
+          </h1>
+          {category.description && (
+            <p class="text-muted-foreground text-sm sm:text-lg max-w-2xl leading-relaxed">
+              {category.description}
+            </p>
+          )}
+        </div>
+
+        <div class="shrink-0 flex items-center gap-3">
+          <span class="px-4 py-2 rounded-2xl bg-card border border-border/70 text-sm font-bold text-foreground">
+            {articles.length} {articles.length === 1 ? 'Article' : 'Articles'}
+          </span>
+          <a
+            href="/categories"
+            class="px-4 py-2 rounded-2xl bg-muted hover:bg-primary hover:text-primary-foreground text-sm font-semibold transition-colors"
+          >
+            All Topics →
+          </a>
+        </div>
+      </header>
+
+      <!-- ── Other Category Filter Pills ── -->
+      <div class="mb-10">
+        <CategoryFilter categories={categoryCounts} activeSlug={category.slug} totalArticlesCount={allArticles.length} baseUrl="/categories" />
+      </div>
+
+      <!-- ── Articles Grid ── -->
+      {articles.length === 0 ? (
+        <div class="rounded-3xl border border-dashed border-border/80 bg-card p-12 text-center my-8">
+          <div class="size-14 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto mb-4">
+            <svg class="size-7" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h3 class="text-lg font-bold text-foreground mb-1">No articles found in {category.name}</h3>
+          <p class="text-sm text-muted-foreground mb-6">Check back soon for new articles in this topic.</p>
+          <a href="/categories" class="inline-flex items-center px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-semibold">
+            Browse Other Categories
+          </a>
+        </div>
+      ) : (
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+          {articles.map((article) => (
+            <BlogCard article={article} />
+          ))}
+        </div>
+      )}
+
+      <!-- ── Big Start Free Trial & Demo Showcase Banner ── -->
+      <StartFreeTrialBanner />
+
+      <NewsletterCTA />
+    </main>
+
+    <Footer />
+  </body>
+</html>

@@ -1,0 +1,191 @@
+---
+import { getCategories } from '../lib/strapi';
+
+let categories: any[] = [];
+try {
+  categories = await getCategories();
+} catch {
+  categories = [];
+}
+---
+
+<footer class="border-t border-border/70 bg-card text-card-foreground mt-auto">
+  <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-10 py-12 lg:py-16">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-12">
+      <!-- Brand & Mission (4 cols) -->
+      <div class="lg:col-span-4 flex flex-col justify-between">
+        <div>
+          <a href="/" class="inline-flex items-center gap-2.5 mb-4 group" aria-label="Sazilo Store Blog Home">
+            <img src="/sazilo-logo.webp" alt="Sazilo Store Logo" class="h-8 w-auto object-contain transition-transform group-hover:scale-105" />
+            <div class="flex flex-col">
+              <span class="text-xl font-extrabold tracking-tight text-foreground group-hover:text-primary transition-colors">
+                Sazilo Store
+              </span>
+              <span class="text-[10px] font-semibold tracking-widest uppercase text-muted-foreground -mt-1">
+                by Vritico Solutions
+              </span>
+            </div>
+          </a>
+          <p class="text-sm text-muted-foreground leading-relaxed max-w-sm mb-4">
+            We build and run business software from Bhaktapur, Nepal. Sazilo Store empowers local retailers with 0% sales commission, integrated Cloud POS, and automated commerce.
+          </p>
+          <div class="flex flex-wrap items-center gap-2.5 mb-6">
+            <a
+              href="https://sazilostore.vritico.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary text-xs font-semibold transition-colors border border-primary/20"
+            >
+              Visit Sazilo Store ↗
+            </a>
+            <a
+              href="https://www.vritico.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-muted hover:bg-muted/80 text-foreground text-xs font-semibold transition-colors border border-border"
+            >
+              Vritico Website ↗
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Products & Ecosystem (3 cols) -->
+      <div class="lg:col-span-3">
+        <h4 class="text-xs font-bold uppercase tracking-widest text-foreground mb-4">Products &amp; Ecosystem</h4>
+        <ul class="space-y-2.5 text-sm">
+          <li>
+            <a href="https://sazilostore.vritico.com" target="_blank" rel="noopener noreferrer" class="text-muted-foreground hover:text-primary transition-colors">
+              Sazilo.store (E-Commerce)
+            </a>
+          </li>
+          <li>
+            <a href="https://sazilostore.vritico.com/#showcase" target="_blank" rel="noopener noreferrer" class="text-muted-foreground hover:text-primary transition-colors">
+              Smart Cloud POS
+            </a>
+          </li>
+          <li>
+            <a href="https://www.vritico.com" target="_blank" rel="noopener noreferrer" class="text-muted-foreground hover:text-primary transition-colors">
+              ERP Suite
+            </a>
+          </li>
+          <li>
+            <a href="https://www.vritico.com" target="_blank" rel="noopener noreferrer" class="text-muted-foreground hover:text-primary transition-colors">
+              Consultancy Management System
+            </a>
+          </li>
+          <li>
+            <a href="https://www.vritico.com" target="_blank" rel="noopener noreferrer" class="text-muted-foreground hover:text-primary transition-colors">
+              Vritico Website Builder
+            </a>
+          </li>
+          <li>
+            <a href="https://www.vritico.com" target="_blank" rel="noopener noreferrer" class="text-muted-foreground hover:text-primary transition-colors">
+              Social by Vritico
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Categories / Navigation (2 cols) -->
+      <div class="lg:col-span-2">
+        <div class="flex items-center justify-between mb-4">
+          <h4 class="text-xs font-bold uppercase tracking-widest text-foreground">Categories</h4>
+          <a href="/categories" class="text-[11px] font-semibold text-primary hover:underline">All →</a>
+        </div>
+        <ul class="space-y-2.5 text-sm">
+          {categories.slice(0, 6).map((cat) => (
+            <li>
+              <a href={`/category/${cat.slug}`} class="text-muted-foreground hover:text-primary transition-colors capitalize">
+                {cat.name}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <!-- Stay Connected & Contact Details (3 cols) -->
+      <div class="lg:col-span-3">
+        <h4 class="text-xs font-bold uppercase tracking-widest text-foreground mb-4">Stay Connected</h4>
+        <ul class="space-y-3 text-sm">
+          <li>
+            <a
+              href="mailto:vriticosolutions@gmail.com"
+              class="inline-flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors"
+            >
+              <svg class="size-4 shrink-0 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+              <span>vriticosolutions@gmail.com</span>
+            </a>
+          </li>
+          <li>
+            <a
+              href="tel:+9779804003501"
+              class="inline-flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors"
+            >
+              <svg class="size-4 shrink-0 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+              </svg>
+              <span>+977 9804003501</span>
+            </a>
+          </li>
+          <li>
+            <a
+              href="tel:+9779862045258"
+              class="inline-flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors"
+            >
+              <svg class="size-4 shrink-0 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+              </svg>
+              <span>+977 9862045258</span>
+            </a>
+          </li>
+          <li>
+            <a
+              href="tel:+9779814170747"
+              class="inline-flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors"
+            >
+              <svg class="size-4 shrink-0 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+              </svg>
+              <span>+977 9814170747</span>
+            </a>
+          </li>
+          <li class="inline-flex items-center gap-2 text-muted-foreground">
+            <svg class="size-4 shrink-0 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            <span>Bhaktapur, Nepal</span>
+          </li>
+          <li>
+            <a
+              href="https://www.vritico.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex items-center gap-2 text-primary font-semibold hover:underline"
+            >
+              <svg class="size-4 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+              </svg>
+              <span>www.vritico.com ↗</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Bottom Bar -->
+    <div class="mt-12 pt-8 border-t border-border/50 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-muted-foreground">
+      <p>© {new Date().getFullYear()} Vritico Solutions. All rights reserved. Sazilo Store is a registered product of Vritico Solutions.</p>
+      <div class="flex flex-wrap items-center gap-4 sm:gap-6">
+        <a href="https://www.vritico.com" target="_blank" rel="noopener noreferrer" class="hover:text-foreground transition-colors">Vritico Solutions</a>
+        <span>•</span>
+        <a href="https://sazilostore.vritico.com" target="_blank" rel="noopener noreferrer" class="hover:text-foreground transition-colors">Sazilo Store</a>
+        <span>•</span>
+        <a href="mailto:vriticosolutions@gmail.com" class="hover:text-foreground transition-colors">Contact Us</a>
+      </div>
+    </div>
+  </div>
+</footer>
