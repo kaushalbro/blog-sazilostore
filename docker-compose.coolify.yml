@@ -1,0 +1,36 @@
+services:
+  sazilo-store:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sazilo-store-app
+    restart: unless-stopped
+    networks:
+      - coolify
+    volumes:
+      - sazilo_app_data:/var/lib/mysql
+      - sazilo_app_uploads:/app/blog-cms/public/uploads
+    labels:
+      - "traefik.enable=true"
+      # 1. Astro Blog Frontend (blog.vritico.com -> port 4321)
+      - "traefik.http.routers.sazilo-blog.rule=Host(`blog.vritico.com`)"
+      - "traefik.http.routers.sazilo-blog.entrypoints=https"
+      - "traefik.http.routers.sazilo-blog.tls=true"
+      - "traefik.http.routers.sazilo-blog.tls.certresolver=letsencrypt"
+      - "traefik.http.services.sazilo-blog.loadbalancer.server.port=4321"
+      # 2. Strapi CMS & Media (cmsblog.vritico.com -> port 1337)
+      - "traefik.http.routers.sazilo-cms.rule=Host(`cmsblog.vritico.com`)"
+      - "traefik.http.routers.sazilo-cms.entrypoints=https"
+      - "traefik.http.routers.sazilo-cms.tls=true"
+      - "traefik.http.routers.sazilo-cms.tls.certresolver=letsencrypt"
+      - "traefik.http.services.sazilo-cms.loadbalancer.server.port=1337"
+
+networks:
+  coolify:
+    external: true
+
+volumes:
+  sazilo_app_data:
+    name: sazilo_app_data
+  sazilo_app_uploads:
+    name: sazilo_app_uploads
