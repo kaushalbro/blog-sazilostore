@@ -113,10 +113,22 @@ export function getResponsiveMedia(
 
 export async function getArticles(): Promise<Article[]> {
   try {
-    const data = await strapiFetch(
-      '/api/articles?populate[cover]=true&populate[author][populate]=avatar&populate[category]=true&populate[blocks][populate]=*&sort=publishedAt:desc&pagination[pageSize]=500'
-    );
-    return data.data ?? [];
+    let allArticles: Article[] = [];
+    let page = 1;
+    let pageCount = 1;
+    const pageSize = 100;
+
+    do {
+      const data = await strapiFetch(
+        `/api/articles?populate[cover]=true&populate[author][populate]=avatar&populate[category]=true&populate[blocks][populate]=*&sort[0]=id:desc&pagination[page]=${page}&pagination[pageSize]=${pageSize}`
+      );
+      const items = data.data ?? [];
+      allArticles = allArticles.concat(items);
+      pageCount = data.meta?.pagination?.pageCount || 1;
+      page++;
+    } while (page <= pageCount);
+
+    return allArticles;
   } catch {
     return [];
   }
