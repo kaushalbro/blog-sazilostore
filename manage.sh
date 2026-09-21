@@ -80,6 +80,22 @@ cmd_backup_db() {
     echo -e "${GREEN}>>> Database successfully exported to $BACKUP_FILE (${NC}$(du -h "$BACKUP_FILE" | cut -f1)${GREEN})${NC}"
 }
 
+cmd_reset_admin() {
+    EMAIL="${2:-admin@vritico.com}"
+    if [ -n "$3" ]; then
+        NEW_PASS="$3"
+    else
+        read -p "Enter new admin password for $EMAIL: " NEW_PASS
+    fi
+    if [ -z "$NEW_PASS" ]; then
+        echo -e "${RED}Password cannot be empty.${NC}"
+        return
+    fi
+    echo -e "${YELLOW}>>> Resetting Strapi Admin password for $EMAIL...${NC}"
+    docker exec "$CONTAINER_NAME" bash -c "cd /app/blog-cms && DATABASE_CLIENT=mysql DATABASE_HOST=127.0.0.1 DATABASE_PORT=3306 DATABASE_NAME=blog DATABASE_USERNAME=root DATABASE_PASSWORD='@root123' APP_KEYS='lxLQVuOI4c5zA+U76ZTChw==,wzayKU1ID4OPqF87tvR9YQ==,+iq3/kDD1phTgaqCoHSxcA==' API_TOKEN_SALT='AoQ7/6hERXSLanFWkRWazg==' ADMIN_JWT_SECRET='qMtK16lGuJXSuvtG1Cuu1w==' JWT_SECRET='/yLEiwPHuYLCFGFxN27OAQ==' TRANSFER_TOKEN_SALT='KBgcYG7j1Dc6WUHIEL2+IA==' ENCRYPTION_KEY='V+vIeG92Faa2mOjC7+fxTA==' npx strapi admin:reset-user-password --email '$EMAIL' --password '$NEW_PASS'"
+    echo -e "${GREEN}>>> Admin password updated successfully!${NC}"
+}
+
 show_menu() {
     print_header
     echo "1) update        - Rebuild container with latest code changes"
@@ -90,9 +106,10 @@ show_menu() {
     echo "6) logs          - View live container logs"
     echo "7) status        - Check container status and RAM consumption"
     echo "8) backup-db     - Export full database backup to .sql file"
+    echo "9) reset-admin   - Reset Strapi admin password"
     echo "0) exit          - Exit"
     echo ""
-    read -p "Select an option [0-8]: " choice
+    read -p "Select an option [0-9]: " choice
     case "$choice" in
         1) cmd_update ;;
         2) cmd_refresh_blog ;;
@@ -102,6 +119,7 @@ show_menu() {
         6) cmd_logs ;;
         7) cmd_status ;;
         8) cmd_backup_db ;;
+        9) cmd_reset_admin ;;
         0) exit 0 ;;
         *) echo -e "${RED}Invalid option.${NC}" ;;
     esac
@@ -133,11 +151,14 @@ case "$1" in
     backup|backup-db)
         cmd_backup_db
         ;;
+    reset-admin)
+        cmd_reset_admin "$@"
+        ;;
     "")
         show_menu
         ;;
     *)
-        echo "Usage: ./manage.sh [update|refresh-blog|start|stop|restart|logs|status|backup-db]"
+        echo "Usage: ./manage.sh [update|refresh-blog|start|stop|restart|logs|status|backup-db|reset-admin]"
         exit 1
         ;;
 esac
