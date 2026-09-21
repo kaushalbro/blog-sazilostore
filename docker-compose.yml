@@ -1,0 +1,19 @@
+services:
+  sazilo-store:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sazilo-store-app
+    restart: unless-stopped
+    ports:
+      - "1337:1337"
+      - "4321:4321"
+    volumes:
+      - sazilo_app_data:/var/lib/mysql
+      - sazilo_app_uploads:/app/blog-cms/public/uploads
+
+volumes:
+  sazilo_app_data:
+    name: sazilo_app_data
+  sazilo_app_uploads:
+    name: sazilo_app_uploads

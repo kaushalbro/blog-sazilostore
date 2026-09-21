@@ -1,0 +1,15 @@
+node_modules
+.tmp
+.cache
+.git
+.astro
+dist
+build
+blog-cms/node_modules
+blog-cms/.tmp
+blog-cms/.cache
+blog-cms/dist
+blog-cms/build
+regular-resonance/node_modules
+regular-resonance/.astro
+regular-resonance/dist
