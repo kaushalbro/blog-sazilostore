@@ -14,7 +14,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python3 \
     libvips-dev \
     ca-certificates \
-    && npm install -g pnpm \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
@@ -30,14 +29,14 @@ RUN chmod +x /app/entrypoint.sh
 # 1. Setup Strapi CMS backend
 WORKDIR /app/blog-cms
 COPY blog-cms/package*.json ./
-RUN pnpm install --no-frozen-lockfile
+RUN npm install
 COPY blog-cms/ ./
-RUN pnpm run build
+RUN npm run build
 
 # 2. Setup Astro 7 frontend
 WORKDIR /app/regular-resonance
 COPY regular-resonance/package*.json ./
-RUN pnpm install --no-frozen-lockfile
+RUN npm install
 COPY regular-resonance/ ./
 
 WORKDIR /app
