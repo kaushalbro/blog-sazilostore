@@ -40,9 +40,11 @@ const formattedDate = article.publishedAt
     })
   : 'Recently Published';
 
-const canonicalUrl = new URL(`/blog/${article.slug}`, Astro.url).href;
-const pageTitle = `${article.title} — Sazilo Store Blog`;
-const pageDescription = article.description || article.title;
+const canonicalUrl = `https://blog.vritico.com/blog/${article.slug}`;
+const pageTitle = article.title.includes('Sazilo Store')
+  ? article.title
+  : `${article.title} — Sazilo Store`;
+const pageDescription = article.description || `Read ${article.title} on Sazilo Store Blog. Practical e-commerce strategies, retail workflows, and merchant insights from Nepal.`;
 
 function renderRichText(body: string): string {
   if (!body) return '';
@@ -140,6 +142,43 @@ function renderRichText(body: string): string {
   }).join('\n');
 }
 
+const breadcrumbElements: any[] = [
+  {
+    "@type": "ListItem",
+    "position": 1,
+    "name": "Home",
+    "item": "https://blog.vritico.com"
+  },
+  {
+    "@type": "ListItem",
+    "position": 2,
+    "name": "Blog",
+    "item": "https://blog.vritico.com/blog"
+  }
+];
+
+if (article.category) {
+  breadcrumbElements.push({
+    "@type": "ListItem",
+    "position": 3,
+    "name": article.category.name,
+    "item": `https://blog.vritico.com/category/${article.category.slug}`
+  });
+  breadcrumbElements.push({
+    "@type": "ListItem",
+    "position": 4,
+    "name": article.title,
+    "item": canonicalUrl
+  });
+} else {
+  breadcrumbElements.push({
+    "@type": "ListItem",
+    "position": 3,
+    "name": article.title,
+    "item": canonicalUrl
+  });
+}
+
 const jsonLd = [
   {
     "@context": "https://schema.org",
@@ -169,26 +208,7 @@ const jsonLd = [
   {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
-    "itemListElement": [
-      {
-        "@type": "ListItem",
-        "position": 1,
-        "name": "Home",
-        "item": new URL("/", Astro.url).href
-      },
-      {
-        "@type": "ListItem",
-        "position": 2,
-        "name": "Blog",
-        "item": new URL("/blog", Astro.url).href
-      },
-      {
-        "@type": "ListItem",
-        "position": 3,
-        "name": article.title,
-        "item": canonicalUrl
-      }
-    ]
+    "itemListElement": breadcrumbElements
   }
 ];
 ---
@@ -258,7 +278,7 @@ const jsonLd = [
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-y border-border/70 py-4">
             <div class="flex items-center gap-3">
               {authorAvatar ? (
-                <img src={authorAvatar} alt={article.author?.name || 'Author'} class="size-11 rounded-full object-cover ring-2 ring-primary/30" />
+                <img src={authorAvatar} alt={article.author?.name || 'Author'} width="44" height="44" loading="lazy" decoding="async" class="size-11 rounded-full object-cover ring-2 ring-primary/30" />
               ) : (
                 <div class="size-11 rounded-full bg-primary/15 text-primary font-bold text-base flex items-center justify-center ring-2 ring-primary/30">
                   {article.author?.name ? article.author.name.charAt(0).toUpperCase() : 'S'}
@@ -285,8 +305,12 @@ const jsonLd = [
             <img
               src={cover}
               alt={article.title}
+              width="1200"
+              height="630"
               class="w-full h-auto max-h-[540px] object-cover"
               loading="eager"
+              fetchpriority="high"
+              decoding="async"
             />
             {article.cover?.caption && (
               <p class="p-3 text-center text-xs text-muted-foreground italic bg-card/80 border-t border-border/40">
@@ -323,8 +347,11 @@ const jsonLd = [
                   <img
                     src={src}
                     alt={block.file?.alternativeText || article.title}
+                    width="800"
+                    height="450"
                     class="rounded-2xl w-full max-h-[480px] object-cover shadow-md border border-border/60"
                     loading="lazy"
+                    decoding="async"
                   />
                   {block.file?.caption && (
                     <figcaption class="mt-2 text-center text-xs text-muted-foreground italic">
@@ -343,9 +370,12 @@ const jsonLd = [
                     return s ? (
                       <img
                         src={s}
-                        alt={f?.alternativeText || ''}
+                        alt={f?.alternativeText || article.title}
+                        width="600"
+                        height="400"
                         class="rounded-2xl w-full h-64 object-cover shadow-sm border border-border/60 hover:scale-[1.02] transition-transform duration-300"
                         loading="lazy"
+                        decoding="async"
                       />
                     ) : null;
                   })}

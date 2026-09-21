@@ -31,23 +31,45 @@ try {
   articles = [];
 }
 
-const pageTitle = "About Sazilo Store — Publication & Community";
-const pageDescription = "Learn about Sazilo Store Blog, our mission to champion authentic local businesses, technology, direct commerce, and impactful storytelling.";
+const pageTitle = "About Sazilo Store — E-Commerce Blog & Mission";
+const pageDescription = "Learn about Sazilo Store Blog, our mission to champion authentic local businesses in Nepal, zero-commission retail, Cloud POS technology, and direct commerce.";
 
-const jsonLd = {
-  "@context": "https://schema.org",
-  "@type": "AboutPage",
-  "name": pageTitle,
-  "description": pageDescription,
-  "url": Astro.url.href,
-  "mainEntity": {
-    "@type": "Organization",
-    "name": "Sazilo Store",
-    "url": "https://sazilostore.vritico.com",
-    "logo": "https://sazilostore.vritico.com/storage/platform/logo.webp",
-    "description": "Global Marketplace & Direct Store Connect. Discover authentic products from verified local businesses with Zero Middleman."
+const canonicalUrl = "https://blog.vritico.com/about";
+
+const jsonLd = [
+  {
+    "@context": "https://schema.org",
+    "@type": "AboutPage",
+    "name": pageTitle,
+    "description": pageDescription,
+    "url": canonicalUrl,
+    "mainEntity": {
+      "@type": "Organization",
+      "name": "Sazilo Store",
+      "url": "https://sazilostore.vritico.com",
+      "logo": "https://sazilostore.vritico.com/storage/platform/logo.webp",
+      "description": "Global Marketplace & Direct Store Connect. Discover authentic products from verified local businesses with Zero Middleman."
+    }
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": "https://blog.vritico.com"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "About",
+        "item": canonicalUrl
+      }
+    ]
   }
-};
+];
 ---
 
 <html lang="en">
@@ -57,6 +79,7 @@ const jsonLd = {
     <SEO
       title={pageTitle}
       description={pageDescription}
+      canonicalUrl={canonicalUrl}
       jsonLd={jsonLd}
     />
   </head>
@@ -182,6 +205,54 @@ const jsonLd = {
           </div>
         </section>
       )}
+
+      <!-- ── Connect Across Social Platforms ── -->
+      <section class="my-16 p-8 rounded-3xl border border-border/70 bg-card/60">
+        <h2 class="text-2xl font-bold text-foreground mb-2">Connect with Our Community</h2>
+        <p class="text-sm text-muted-foreground mb-6">Follow our updates, tutorials, and community discussions on official channels:</p>
+        <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+          <a
+            href="https://www.facebook.com/vriticosolutions"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="flex items-center justify-center gap-2 p-3 rounded-xl border border-border bg-background hover:bg-primary hover:text-primary-foreground text-xs font-bold transition-all"
+          >
+            <span>Facebook</span>
+          </a>
+          <a
+            href="https://www.instagram.com/vriticosolutions"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="flex items-center justify-center gap-2 p-3 rounded-xl border border-border bg-background hover:bg-primary hover:text-primary-foreground text-xs font-bold transition-all"
+          >
+            <span>Instagram</span>
+          </a>
+          <a
+            href="https://www.youtube.com/@vriticosolutions"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="flex items-center justify-center gap-2 p-3 rounded-xl border border-border bg-background hover:bg-primary hover:text-primary-foreground text-xs font-bold transition-all"
+          >
+            <span>YouTube</span>
+          </a>
+          <a
+            href="https://www.linkedin.com/company/vritico-solutions"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="flex items-center justify-center gap-2 p-3 rounded-xl border border-border bg-background hover:bg-primary hover:text-primary-foreground text-xs font-bold transition-all"
+          >
+            <span>LinkedIn</span>
+          </a>
+          <a
+            href="https://x.com/vritico"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="flex items-center justify-center gap-2 p-3 rounded-xl border border-border bg-background hover:bg-primary hover:text-primary-foreground text-xs font-bold transition-all"
+          >
+            <span>X (Twitter)</span>
+          </a>
+        </div>
+      </section>
 
       <!-- ── Big Start Free Trial & Demo Showcase Banner ── -->
       <StartFreeTrialBanner />

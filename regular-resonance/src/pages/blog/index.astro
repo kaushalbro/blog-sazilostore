@@ -44,27 +44,51 @@ const categoryCounts = categories.map((cat) => {
 });
 
 const pageTitle = selectedCategory === 'all'
-  ? "Blog Archive — Sazilo Store"
-  : `${selectedCategory.toUpperCase()} Articles — Sazilo Store Blog`;
+  ? "E-Commerce Blog & Business Guides — Sazilo Store"
+  : `${selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1)} Guides — Sazilo Store Blog`;
 
-const pageDescription = `Explore ${filteredArticles.length} published articles on Sazilo Store Blog. Featuring stories on technology, nature, commerce, and culture.`;
+const pageDescription = "Browse practical guides, business case studies, and tutorials on starting, scaling, and managing a profitable online store in Nepal with Sazilo Store platform.";
 
-const jsonLd = {
-  "@context": "https://schema.org",
-  "@type": "CollectionPage",
-  "name": pageTitle,
-  "description": pageDescription,
-  "url": Astro.url.href,
-  "mainEntity": {
-    "@type": "ItemList",
-    "itemListElement": filteredArticles.map((a, i) => ({
-      "@type": "ListItem",
-      "position": i + 1,
-      "url": new URL(`/blog/${a.slug}`, Astro.url).href,
-      "name": a.title
-    }))
+const canonicalUrl = selectedCategory === 'all'
+  ? 'https://blog.vritico.com/blog'
+  : `https://blog.vritico.com/blog?category=${encodeURIComponent(selectedCategory)}`;
+
+const jsonLd = [
+  {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "name": pageTitle,
+    "description": pageDescription,
+    "url": canonicalUrl,
+    "mainEntity": {
+      "@type": "ItemList",
+      "itemListElement": filteredArticles.map((a, i) => ({
+        "@type": "ListItem",
+        "position": i + 1,
+        "url": `https://blog.vritico.com/blog/${a.slug}`,
+        "name": a.title
+      }))
+    }
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": "https://blog.vritico.com"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "Blog",
+        "item": "https://blog.vritico.com/blog"
+      }
+    ]
   }
-};
+];
 ---
 
 <html lang="en">
@@ -74,6 +98,7 @@ const jsonLd = {
     <SEO
       title={pageTitle}
       description={pageDescription}
+      canonicalUrl={canonicalUrl}
       jsonLd={jsonLd}
     />
   </head>

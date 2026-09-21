@@ -1,0 +1,29 @@
+# Sazilo Store Blog — Complete Context & Knowledge Base
+
+> Comprehensive technical and business documentation for Sazilo Store Blog, empowering Nepali merchants with zero-commission e-commerce tools, Cloud POS technology, payment gateway integration, and multi-carrier logistics.
+
+## About Sazilo Store
+Sazilo Store (developed and maintained by Vritico Solutions, Bhaktapur, Nepal) is a modern e-commerce platform and Cloud POS software designed specifically for retail businesses, brand stores, and digital merchants across Nepal.
+
+- **0% Platform Sales Commission**: Direct seller-to-buyer transactions without intermediary marketplace deductions.
+- **Sub-15ms Cloud POS**: Keyboard-driven billing with instant F2/F9 receipt printing, weighing scale serial communication, and automated inventory sync.
+- **Automated Courier Integration**: Integrated waybill and shipping label generation connecting with major Nepali couriers across 77 districts.
+- **Native Payment Gateways**: Dynamic QR and API integrations for Fonepay, eSewa, Khalti, and ConnectIPS.
+
+## Key Links & Documentation
+- [Home Page](https://blog.vritico.com/): Curated articles, editorial spotlights, and merchant case studies.
+- [All Articles](https://blog.vritico.com/blog): Complete repository of 103+ in-depth tutorials and business guides.
+- [Categories Directory](https://blog.vritico.com/categories): Categorized learning paths.
+- [About](https://blog.vritico.com/about): Company background, contact information, and editorial standards.
+- [RSS 2.0 Feed](https://blog.vritico.com/rss.xml): Real-time XML content feed.
+
+## Contact & Social Channels
+- Website: https://sazilostore.vritico.com
+- Parent Company: https://www.vritico.com
+- Email: vriticosolutions@gmail.com
+- Telephone: +977 9804003501 / +977 9862045258
+- Facebook: https://www.facebook.com/vriticosolutions
+- Instagram: https://www.instagram.com/vriticosolutions
+- LinkedIn: https://www.linkedin.com/company/vritico-solutions
+- YouTube: https://www.youtube.com/@vriticosolutions
+- X / Twitter: https://x.com/vritico

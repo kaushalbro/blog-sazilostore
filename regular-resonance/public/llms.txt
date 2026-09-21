@@ -1,0 +1,23 @@
+# Sazilo Store Blog
+
+> Sazilo Store Blog is the official knowledge hub for e-commerce website building, retail technology, Cloud POS systems, and merchant growth in Nepal.
+
+## Main Sections
+- [Home](https://blog.vritico.com/): Official Sazilo Store Blog homepage featuring trending e-commerce stories and merchant spotlights.
+- [All Articles](https://blog.vritico.com/blog): Comprehensive archive of 103+ published guides on starting and scaling online stores in Nepal.
+- [Categories Directory](https://blog.vritico.com/categories): Curated topic directory for e-commerce, logistics, payments, and digital marketing.
+- [About Sazilo Store](https://blog.vritico.com/about): Mission, editorial values, and story behind Nepal's leading zero-commission store builder.
+- [RSS Feed](https://blog.vritico.com/rss.xml): Dynamic XML syndication feed for search engines and RSS readers.
+
+## Core Topics & Guides
+- [Business & Growth](https://blog.vritico.com/category/business-growth): High-growth business models, profitability strategies, and entrepreneurship in Nepal.
+- [Logistics & Fulfillment](https://blog.vritico.com/category/logistics): Courier integrations, waybills, automated shipping labels, and delivery workflows across 77 districts.
+- [Payments & FinTech](https://blog.vritico.com/category/payments): Fonepay QR, eSewa, Khalti, ConnectIPS, and dynamic checkout payment gateways in Nepal.
+- [Cloud POS & Retail](https://blog.vritico.com/category/technology): Fast sub-15ms barcode checkout, weighing scale integration, and multi-branch inventory.
+- [Store Marketing & D2C](https://blog.vritico.com/category/culture): Viber community building, WhatsApp direct connect, and social commerce conversion tactics.
+
+## Platform Resources
+- [Sazilo Store Platform](https://sazilostore.vritico.com): Official zero-commission e-commerce website builder and Cloud POS solution in Nepal.
+- [Live Demo Stores](https://sazilostore.vritico.com/#templates): Interactive storefront demos for fashion, groceries, electronics, and luxury jewelry.
+- [Start Free Trial](https://sazilostore.vritico.com/register): 14-day free trial for Nepali retailers and entrepreneurs.
+- [Vritico Solutions](https://www.vritico.com): Parent technology company headquartered in Bhaktapur, Nepal.

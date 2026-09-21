@@ -1,5 +1,5 @@
 ---
-import { mediaUrl, calculateReadingTime, type Article } from '../../lib/strapi';
+import { getResponsiveMedia, mediaUrl, calculateReadingTime, type Article } from '../../lib/strapi';
 
 export interface Props {
   article: Article;
@@ -7,7 +7,7 @@ export interface Props {
 }
 
 const { article, featured = false } = Astro.props;
-const cover = mediaUrl(article.cover);
+const responsiveCover = getResponsiveMedia(article.cover, 600, 400);
 const readTime = calculateReadingTime(article.blocks || article.description);
 const authorAvatar = mediaUrl(article.author?.avatar);
 const formattedDate = article.publishedAt
@@ -30,9 +30,11 @@ const formattedDate = article.publishedAt
       featured ? 'md:col-span-6 h-64 md:h-full min-h-[260px]' : 'h-52 w-full aspect-video sm:aspect-auto'
     }`}
   >
-    {cover ? (
+    {responsiveCover ? (
       <img
-        src={cover}
+        src={responsiveCover.src}
+        srcset={responsiveCover.srcSet}
+        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 400px"
         alt={article.title}
         width="600"
         height="400"

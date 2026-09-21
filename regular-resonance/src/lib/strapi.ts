@@ -44,10 +44,71 @@ export type Article = {
 
 export function mediaUrl(media: StrapiMedia | { url?: string } | null | undefined): string | null {
   if (!media || !('url' in media) || !media.url) return null;
-  const url = (media as any).url as string;
+  let url = (media as any).url as string;
+  if (url.startsWith('http://localhost:1337') || url.startsWith('http://127.0.0.1:1337')) {
+    return url.replace(/^http:\/\/(localhost|127\.0\.0\.1):1337/, 'https://cmsblog.vritico.com');
+  }
   if (url.startsWith('http://') || url.startsWith('https://')) return url;
   const baseUrl = import.meta.env.PUBLIC_STRAPI_URL || 'https://cmsblog.vritico.com';
-  return `${baseUrl}${url}`;
+  return `${baseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
+}
+
+export interface ResponsiveMedia {
+  src: string;
+  srcSet?: string;
+  width: number;
+  height: number;
+}
+
+export function getResponsiveMedia(
+  media: StrapiMedia | null | undefined,
+  defaultWidth = 600,
+  defaultHeight = 400
+): ResponsiveMedia | null {
+  if (!media || !('url' in media) || !media.url) return null;
+
+  const mainUrl = mediaUrl(media) || '';
+  const width = media.width || defaultWidth;
+  const height = media.height || defaultHeight;
+
+  if (!media.formats || typeof media.formats !== 'object') {
+    return { src: mainUrl, width, height };
+  }
+
+  const sources: string[] = [];
+  if (media.formats.thumbnail?.url && media.formats.thumbnail?.width) {
+    const tUrl = mediaUrl(media.formats.thumbnail);
+    if (tUrl) sources.push(`${tUrl} ${media.formats.thumbnail.width}w`);
+  }
+  if (media.formats.small?.url && media.formats.small?.width) {
+    const sUrl = mediaUrl(media.formats.small);
+    if (sUrl) sources.push(`${sUrl} ${media.formats.small.width}w`);
+  }
+  if (media.formats.medium?.url && media.formats.medium?.width) {
+    const mUrl = mediaUrl(media.formats.medium);
+    if (mUrl) sources.push(`${mUrl} ${media.formats.medium.width}w`);
+  }
+  if (media.formats.large?.url && media.formats.large?.width) {
+    const lUrl = mediaUrl(media.formats.large);
+    if (lUrl) sources.push(`${lUrl} ${media.formats.large.width}w`);
+  }
+  if (media.width && mainUrl) {
+    sources.push(`${mainUrl} ${media.width}w`);
+  }
+
+  // Choose optimal default src for immediate paint (e.g. medium if available to save bandwidth)
+  const preferredSrc = media.formats.medium?.url
+    ? mediaUrl(media.formats.medium) || mainUrl
+    : media.formats.small?.url
+      ? mediaUrl(media.formats.small) || mainUrl
+      : mainUrl;
+
+  return {
+    src: preferredSrc,
+    srcSet: sources.length > 0 ? sources.join(', ') : undefined,
+    width,
+    height,
+  };
 }
 
 export async function getArticles(): Promise<Article[]> {

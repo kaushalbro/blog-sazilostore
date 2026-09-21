@@ -39,9 +39,30 @@ const categoryCounts = categories.map((cat) => {
 });
 
 const pageTitle = "Sazilo Store Blog — E-Commerce Website Builder Nepal";
-const pageDescription = "Explore e-commerce guides, retail strategies, and tech tutorials from verified Nepali merchants on Sazilo Store Blog.";
+const pageDescription = "Explore expert e-commerce guides, online store strategies, Cloud POS tutorials, and digital commerce insights from verified Nepali merchants on Sazilo Store.";
 
 const jsonLd = [
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Sazilo Store Blog",
+    "url": "https://blog.vritico.com",
+    "description": pageDescription,
+    "publisher": {
+      "@type": "Organization",
+      "name": "Sazilo Store",
+      "url": "https://sazilostore.vritico.com",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://sazilostore.vritico.com/storage/platform/logo.webp"
+      }
+    },
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://blog.vritico.com/blog?category={search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
+  },
   {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
@@ -76,7 +97,7 @@ const jsonLd = [
     "@context": "https://schema.org",
     "@type": "Blog",
     "name": "Sazilo Store Blog",
-    "url": Astro.url.href,
+    "url": "https://blog.vritico.com",
     "description": pageDescription,
     "publisher": {
       "@type": "Organization",
@@ -91,7 +112,7 @@ const jsonLd = [
       "@type": "BlogPosting",
       "headline": a.title,
       "description": a.description || a.title,
-      "url": new URL(`/blog/${a.slug}`, Astro.url).href,
+      "url": `https://blog.vritico.com/blog/${a.slug}`,
       "datePublished": a.publishedAt || new Date().toISOString(),
       "author": {
         "@type": "Person",

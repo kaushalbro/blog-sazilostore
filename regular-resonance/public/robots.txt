@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://astrostrapi.io/sitemap-index.xml
+Sitemap: https://blog.vritico.com/sitemap-index.xml

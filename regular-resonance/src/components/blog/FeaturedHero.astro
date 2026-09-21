@@ -1,5 +1,5 @@
 ---
-import { mediaUrl, calculateReadingTime, type Article } from '../../lib/strapi';
+import { getResponsiveMedia, mediaUrl, calculateReadingTime, type Article } from '../../lib/strapi';
 
 export interface Props {
   featuredArticle?: Article | null;
@@ -12,7 +12,7 @@ if (!featuredArticle && sideArticles.length === 0) {
   return;
 }
 
-const mainCover = featuredArticle ? mediaUrl(featuredArticle.cover) : null;
+const responsiveMainCover = featuredArticle ? getResponsiveMedia(featuredArticle.cover, 1200, 800) : null;
 const mainAuthorAvatar = featuredArticle ? mediaUrl(featuredArticle.author?.avatar) : null;
 const mainReadTime = featuredArticle ? calculateReadingTime(featuredArticle.blocks || featuredArticle.description) : '3 min read';
 const mainDate = featuredArticle?.publishedAt
@@ -31,14 +31,18 @@ const mainDate = featuredArticle?.publishedAt
       <div class="lg:col-span-7 flex">
         <article class="group relative flex flex-col justify-between w-full rounded-3xl overflow-hidden border border-border/70 bg-card shadow-lg transition-all duration-300 hover:shadow-2xl hover:border-primary/50">
           <div class="relative h-72 sm:h-96 w-full overflow-hidden bg-muted/40">
-            {mainCover ? (
+            {responsiveMainCover ? (
               <img
-                src={mainCover}
+                src={responsiveMainCover.src}
+                srcset={responsiveMainCover.srcSet}
+                sizes="(max-width: 1024px) 100vw, 750px"
                 alt={featuredArticle.title}
                 width="1200"
                 height="800"
                 class="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                 loading="eager"
+                fetchpriority="high"
+                decoding="async"
               />
             ) : (
               <div class="flex h-full w-full items-center justify-center bg-muted text-muted-foreground/60">
@@ -93,7 +97,7 @@ const mainDate = featuredArticle?.publishedAt
             <div class="flex items-center justify-between border-t border-border/60 pt-5">
               <div class="flex items-center gap-3">
                 {mainAuthorAvatar ? (
-                  <img src={mainAuthorAvatar} alt={featuredArticle.author?.name || 'Author'} width="36" height="36" class="size-9 rounded-full object-cover ring-2 ring-primary/30" />
+                  <img src={mainAuthorAvatar} alt={featuredArticle.author?.name || 'Author'} width="36" height="36" loading="lazy" decoding="async" class="size-9 rounded-full object-cover ring-2 ring-primary/30" />
                 ) : (
                   <div class="size-9 rounded-full bg-primary/15 text-primary font-bold flex items-center justify-center text-sm">
                     {featuredArticle.author?.name ? featuredArticle.author.name.charAt(0).toUpperCase() : 'S'}
@@ -129,7 +133,7 @@ const mainDate = featuredArticle?.publishedAt
 
       <div class="flex flex-col gap-4 flex-1">
         {sideArticles.map((article, idx) => {
-          const cover = mediaUrl(article.cover);
+          const sideCover = getResponsiveMedia(article.cover, 200, 200);
           const date = article.publishedAt
             ? new Date(article.publishedAt).toLocaleDateString('en-US', {
                 month: 'short',
@@ -140,14 +144,17 @@ const mainDate = featuredArticle?.publishedAt
           return (
             <article class="group relative flex gap-4 p-4 rounded-2xl border border-border/60 bg-card hover:bg-card/80 hover:border-primary/40 hover:shadow-md transition-all flex-1">
               <div class="relative size-24 sm:size-28 shrink-0 rounded-xl overflow-hidden bg-muted/40">
-                {cover ? (
+                {sideCover ? (
                   <img
-                    src={cover}
+                    src={sideCover.src}
+                    srcset={sideCover.srcSet}
+                    sizes="112px"
                     alt={article.title}
                     width="112"
                     height="112"
                     class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                     loading="lazy"
+                    decoding="async"
                   />
                 ) : (
                   <div class="flex h-full w-full items-center justify-center bg-primary/10 text-primary/40 font-bold text-lg">
