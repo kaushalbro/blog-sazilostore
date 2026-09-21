@@ -1,7 +1,7 @@
 export const buildMediaUrl = (url: string) => {
-    if (url.startsWith("http")) {
+    if (url.startsWith("http://") || url.startsWith("https://")) {
         return url;
     }
-    const strapiUrl = import.meta.env.PUBLIC_STRAPI_URL || import.meta.env.STRAPI_URL || "http://localhost:1337";
+    const strapiUrl = import.meta.env.PUBLIC_STRAPI_URL || "https://cmsblog.vritico.com";
     return `${strapiUrl}${url}`;
 };

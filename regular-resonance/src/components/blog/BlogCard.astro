@@ -26,8 +26,8 @@ const formattedDate = article.publishedAt
 >
   <!-- Thumbnail Container -->
   <div
-    class={`relative overflow-hidden bg-muted/40 ${
-      featured ? 'md:col-span-6 h-64 md:h-full min-h-[260px]' : 'h-52 w-full'
+    class={`relative overflow-hidden bg-muted/40 shrink-0 ${
+      featured ? 'md:col-span-6 h-64 md:h-full min-h-[260px]' : 'h-52 w-full aspect-video sm:aspect-auto'
     }`}
   >
     {cover ? (
