@@ -1,0 +1,20 @@
+# ==============================================================================
+# Caddyfile Configuration for Sazilo Store Blog (vritico.com)
+# Place this at /etc/caddy/Caddyfile on your server
+# Automatic SSL / HTTPS is handled natively by Caddy!
+# ==============================================================================
+
+# 1. Astro Blog Frontend
+blog.vritico.com {
+    reverse_proxy 127.0.0.1:4321
+}
+
+# 2. Strapi CMS Admin Panel & WebP Media Uploads
+cmsblog.vritico.com {
+    reverse_proxy 127.0.0.1:1337
+
+    # Increase upload limit for media assets
+    request_body {
+        max_size 50MB
+    }
+}

@@ -1,0 +1,43 @@
+# ==============================================================================
+# Nginx Configuration for Sazilo Store Blog (vritico.com)
+# Place this at /etc/nginx/sites-available/sazilo-blog.conf
+# Then run:
+#   sudo ln -s /etc/nginx/sites-available/sazilo-blog.conf /etc/nginx/sites-enabled/
+#   sudo certbot --nginx -d blog.vritico.com -d cmsblog.vritico.com
+# ==============================================================================
+
+# 1. Astro Blog Frontend (blog.vritico.com)
+server {
+    server_name blog.vritico.com;
+
+    location / {
+        proxy_pass http://127.0.0.1:4321;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+
+# 2. Strapi CMS Admin & Media (cmsblog.vritico.com)
+server {
+    server_name cmsblog.vritico.com;
+
+    client_max_body_size 50M;
+
+    location / {
+        proxy_pass http://127.0.0.1:1337;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
